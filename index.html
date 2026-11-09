@@ -105,13 +105,13 @@
     <div class="stats"><div class="stat"><strong id="move-count">0</strong><span>Moves</span></div><div class="stat"><strong id="target-count">60</strong><span>Shortest route</span></div><div class="stat"><strong id="best-count">—</strong><span>Best</span></div></div>
     <div class="board-outer"><div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski puzzle board: four columns by five rows"></div></div><div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div></div>
     <div class="result" id="message" aria-live="polite">Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.</div>
-    <div class="actions"><button class="action" id="undo" type="button">↶ Undo</button><button class="action" id="restart" type="button">↻ Restart</button><button class="action" id="hint" type="button">✧ Hint</button></div>
+    <div class="actions"><button class="action" id="undo" type="button">↶ Undo</button><button class="action" id="restart" type="button">↻ Restart</button><button class="action" id="hint" type="button">✧ Hint (4/4)</button></div>
     <button class="action primary" id="next" type="button" style="width:100%;margin-top:9px;display:none">Next level →</button>
    </article>
    <aside>
     <section class="side-card" id="level-selection"><div class="side-title"><h3>Challenge levels</h3><span class="smallnote" id="completed-count">0 / 12 completed</span></div><div class="levels" id="levels"></div></section>
-    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#65b3ff">blue 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Clear a level to unlock the next.</li></ol></section>
-    <section class="side-card"><div class="tip"><b>Hard mode:</b> No warm-up levels. The shortest solutions range from 60 to 116 moves. Hints calculate a shortest route from your current board. Progress is stored on this device.</div></section>
+    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#65b3ff">blue 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Clear a level to unlock the next.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
+    <section class="side-card"><div class="tip"><b>Hard mode:</b> No warm-up levels. The shortest solutions range from 60 to 116 moves. Each level has 4 hints in total; the remaining count is saved on this device and does not reset when restarting. Hints calculate a shortest route from your current board.</div></section>
    </aside>
   </section>
   <p class="footer">Klotski Hard Mode · 12 verified challenges · Works offline · No sign-in required</p>
@@ -136,6 +136,7 @@
  const DIRECTION={up:[0,-1,'↑'],down:[0,1,'↓'],left:[-1,0,'←'],right:[1,0,'→']};
  const $=id=>document.getElementById(id);
  const STORAGE_KEY='klotski-hard-mode-progress-v2';
+ const MAX_HINTS_PER_LEVEL=4;
  let saved=loadProgress();
  let index=0,blocks=[],selected=0,moves=0,history=[],completed=false,hintId=null;
  const board=$('board');
@@ -143,8 +144,9 @@
   const x=p%4,y=Math.floor(p/4);if(x+shape.w>4||y+shape.h>5)return 0;
   let mask=0;for(let yy=0;yy<shape.h;yy++)for(let xx=0;xx<shape.w;xx++)mask|=1<<((y+yy)*4+x+xx);return mask;
  }));
- function loadProgress(){try{let p=JSON.parse(localStorage.getItem(STORAGE_KEY));if(!p||typeof p!=='object')throw Error();return {unlocked:Math.max(1,Math.min(12,Number(p.unlocked)||1)),best:p.best||{}};}catch{return {unlocked:1,best:{}};}}
+ function loadProgress(){try{let p=JSON.parse(localStorage.getItem(STORAGE_KEY));if(!p||typeof p!=='object'||Array.isArray(p))throw Error();const hintsUsed={};if(p.hintsUsed&&typeof p.hintsUsed==='object'&&!Array.isArray(p.hintsUsed)){for(let n=0;n<LEVELS.length;n++){const used=p.hintsUsed[n];if(Number.isInteger(used)&&used>0)hintsUsed[n]=Math.min(MAX_HINTS_PER_LEVEL,used);}}return {unlocked:Math.max(1,Math.min(12,Number(p.unlocked)||1)),best:p.best||{},hintsUsed};}catch{return {unlocked:1,best:{},hintsUsed:{}};}}
  function storeProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));}catch{/* private mode */}}
+ function hintsRemaining(level=index){return Math.max(0,MAX_HINTS_PER_LEVEL-(saved.hintsUsed[level]||0));}
  function initializeLevel(n){if(n<0||n>=LEVELS.length||n>=saved.unlocked)return;index=n;blocks=LEVELS[n].positions.map((position,id)=>({id,x:position%4,y:Math.floor(position/4),...SHAPES[id]}));selected=0;moves=0;history=[];completed=false;hintId=null;setMessage('Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.');render();}
  function setMessage(text,success=false){const m=$('message');m.innerHTML=text;m.classList.toggle('success',success);}
  function render(){
@@ -176,7 +178,7 @@
    btn.innerHTML=`${locked?'🔒':i+1}<span>${saved.best[i]!=null?'✓ Solved':locked?'Locked':l.minimum+' optimal'}</span>`;
    btn.disabled=locked;btn.setAttribute('aria-label',locked?`Level ${i+1} locked`:`Level ${i+1}: ${l.name}`);btn.addEventListener('click',()=>{initializeLevel(i);document.querySelector('.game-card').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});grid.append(btn);
   });
-  $('undo').disabled=history.length===0;$('hint').disabled=completed;
+  $('undo').disabled=history.length===0;const left=hintsRemaining();$('hint').textContent=`✧ Hint (${left}/${MAX_HINTS_PER_LEVEL})`;$('hint').disabled=completed||left===0;$('hint').setAttribute('aria-label',`Hint: ${left} of ${MAX_HINTS_PER_LEVEL} remaining for this level`);
   $('next').style.display=completed&&index+1<saved.unlocked?'block':'none';
  }
  function select(id){if(completed)return;selected=id;hintId=null;board.querySelectorAll('.tile').forEach((tile,i)=>{tile.classList.toggle('selected',i===id);tile.classList.remove('hinted');tile.setAttribute('aria-pressed',String(i===id));});}
@@ -211,12 +213,13 @@
   let steps=0,first=null,k=end;while(k!==start){const info=seen.get(k);first=info.move;k=info.from;steps++;}
   return {...first,remaining:steps};
  }
- function hint(){if(completed)return;const answer=findShortestNextMove(canonicalPositions());if(!answer){setMessage('No solution could be found from this position.');return;}
+ function hint(){if(completed)return;if(hintsRemaining()===0){setMessage('No hints left for this level. You can still solve it without hints.');return;}const answer=findShortestNextMove(canonicalPositions());if(!answer||!answer.direction){setMessage('No solution could be found from this position.');return;}
   const b=blocks.find(piece=>piece.y*4+piece.x===answer.pos&&piece.type===answer.type);
   if(!b){setMessage('Hint unavailable for this position.');return;}
+  saved.hintsUsed[index]=(saved.hintsUsed[index]||0)+1;storeProgress();
   selected=b.id;hintId=b.id;const dir=DIRECTION[answer.direction][2];
   const friendly=b.type==='goal'?'the large blue block':b.type==='horizontal'?'the gold block':b.type==='vertical'?'the highlighted tall block':'the highlighted small block';
-  setMessage(`<b>Hint:</b> Move ${friendly} ${dir}. <b>${answer.remaining}</b> minimum moves remaining.`);render();
+  setMessage(`<b>Hint:</b> Move ${friendly} ${dir}. <b>${answer.remaining}</b> minimum moves remaining. <b>${hintsRemaining()} of ${MAX_HINTS_PER_LEVEL} hints left.</b>`);render();
  }
  $('undo').addEventListener('click',undo);$('restart').addEventListener('click',()=>initializeLevel(index));$('hint').addEventListener('click',hint);$('next').addEventListener('click',()=>initializeLevel(index+1));
  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;const names={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'};if(names[e.key]){e.preventDefault();moveSelected(names[e.key]);}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}});
