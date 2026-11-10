@@ -1,19 +1,25 @@
-# Klotski V6 — Browser verification
+# Version 7 — Verification
 
-Tests were performed in headless Chromium against local files injected into a browser page. These tests do not imply deployment to GitHub Pages or testing on physical phones.
+## Scope
 
-- All 30 level definitions remain present: 9 Easy, 9 Medium, 12 Hard.
-- All 18 Easy and Medium puzzles were completed by replaying their full validated optimal move sequences through the game logic, checking legal moves, winning states, minimum moves, unlocks, and Next buttons.
-- All 12 Hard puzzle starting states were checked with the in-game shortest-route solver; calculated solutions matched their stored minimum move counts (60–116).
-- Red 2×2 exit animation was observed in Chromium; the animation finishes and removes its temporary element, then reveals the victory panel and Continue button.
-- Checked Easy 9 → Medium 1 and Medium 9 → Hard 1 transitions.
-- Final-level UI tested using a synthetic just-before-win board state, checking `All 30 levels complete!` and absence of Next button; this synthetic test is **not** a full manual Hard 12 playthrough.
-- Fresh player sees Easy 1, locked Easy 2, Medium, and Hard; completed levels remain replayable.
-- Four hint uses per level stay exhausted across Restart and page reload, while another level receives its own four uses.
-- Previous V5 progress, best scores, hints and advanced Hard unlocks are migrated without altering old storage keys.
-- Verified actual pointer swipe and Undo behavior in simulated mobile Chrome.
-- Tested viewport widths 320, 390, 768, 1024, 1280 and 1920 pixels, with no horizontal page overflow.
-- No uncaught JavaScript errors occurred during these test cases.
-- Reduced Motion setting avoids the animated exit.
+Verified using Chromium 144 with Playwright. The browser's environment blocked direct navigation to local files and localhost, so the test harness loaded the exact HTML markup and injected the two checked scripts in the same order as the `defer` tags on the real site. No production GitHub Pages deployment was tested.
 
-Source files: `index.html` and `game-v6.js`. The ZIP contents are ready for offline browser play or deployment from a static GitHub Pages repository root.
+## Results
+
+- **Intro board:** 10 pieces occupy 18 of the 20 cells, leaving two empty cells; four yellow 1×1 blocks, two blue vertical blocks, three green horizontal blocks, and one red 2×2 block.
+- **Three-move path:** left yellow from (2,5) to (1,5); right yellow from (3,5) to (4,5); red block from (2,3) to (2,4). Each move is legal in the current board state. The red block ends at the bottom-center goal and animates through the exit at 100%.
+- **Responsive views:** 320×568, 390×844, 768×1024 and 1440×900; intro, home and game displayed with no horizontal overflow.
+- **Transition:** progress reaches 100%; intro hides; home appears; clicking Play opens the current game board (10 pieces).
+- **Navigation:** Start Playing, Choose a Level and Home navigation all tested.
+- **Skip intro:** immediately opens home and stays stable after the original sequence would have ended.
+- **Reduced motion:** skips the sequence and opens home without animation.
+- **Persistence:** seeded V6 save with Easy Level 1 complete and three used hints on Easy Level 2. Home displayed Easy 2; gameplay displayed 1/4 remaining hints.
+- **Hidden game input:** arrow keys pressed on home did not move game pieces.
+- **Victory regression:** solved Easy Level 1 in browser; in-game red exit animation completed; Continue moved to Easy Level 2; home count updated to 1.
+- **Engine preserved:** the bundled `game-v6.js` matches the original Version 6 ZIP byte-for-byte.
+- **Syntax:** both JavaScript files passed Node.js `--check`.
+- **JavaScript errors:** none in the checked flows.
+
+## Limitations
+
+The opening's displayed percentage represents progress through a deliberate three-move animation, not actual downloaded bytes or server request progress. Physical mobile devices were not tested. The Version 7 source has been committed to GitHub `main`; production GitHub Pages operation was not part of these local tests.
