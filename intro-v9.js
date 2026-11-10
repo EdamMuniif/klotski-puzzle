@@ -1,6 +1,6 @@
 'use strict';
-/* V7 opening: three legal Klotski moves, then the red target exits. This
-   animation is separate from (and never modifies) the 30 real game levels. */
+/* Five-move Klotski opening — separate from the 30 playable levels.
+   Progress is a staged intro animation, not measured network transfer. */
 (() => {
   const el = id => document.getElementById(id);
   const intro = el('intro-screen');
@@ -15,19 +15,20 @@
   let currentPercent = 0;
   const pause = ms => new Promise(resolve => window.setTimeout(resolve, ms));
 
-  // This board is deliberately three legal one-cell moves away from the exit.
-  // Four yellow cells and two empty spaces are retained at every step.
+  // Exact 4×5 Klotski layout: 10 pieces, 18 occupied cells, 2 empty spaces.
+  // Solution: lower-left blue up, lower-right blue up, lower-left yellow left,
+  // lower-right yellow right, then red target down.
   const pieces = [
-    {id:'green-left',type:'green',x:0,y:0,w:2,h:1},
-    {id:'green-right',type:'green',x:2,y:0,w:2,h:1},
-    {id:'green-middle',type:'green',x:1,y:1,w:2,h:1},
-    {id:'blue-left',type:'blue',x:0,y:1,w:1,h:2},
-    {id:'blue-right',type:'blue',x:3,y:1,w:1,h:2},
+    {id:'green-top',type:'green',x:1,y:0,w:2,h:1},
+    {id:'blue-upper-left',type:'blue',x:0,y:0,w:1,h:2},
+    {id:'blue-upper-right',type:'blue',x:3,y:0,w:1,h:2},
+    {id:'yellow-upper-left',type:'yellow',x:1,y:1,w:1,h:1},
+    {id:'yellow-upper-right',type:'yellow',x:2,y:1,w:1,h:1},
     {id:'red-goal',type:'goal',x:1,y:2,w:2,h:2},
-    {id:'yellow-left-upper',type:'yellow',x:0,y:3,w:1,h:1},
-    {id:'yellow-right-upper',type:'yellow',x:3,y:3,w:1,h:1},
-    {id:'yellow-left',type:'yellow',x:1,y:4,w:1,h:1},
-    {id:'yellow-right',type:'yellow',x:2,y:4,w:1,h:1}
+    {id:'blue-lower-left',type:'blue',x:0,y:3,w:1,h:2},
+    {id:'blue-lower-right',type:'blue',x:3,y:3,w:1,h:2},
+    {id:'yellow-lower-left',type:'yellow',x:1,y:4,w:1,h:1},
+    {id:'yellow-lower-right',type:'yellow',x:2,y:4,w:1,h:1}
   ];
   const pieceById = Object.fromEntries(pieces.map(piece => [piece.id,piece]));
 
@@ -39,7 +40,7 @@
     tile.style.setProperty('--iy', String(piece.y));
     tile.style.setProperty('--iw', String(piece.w));
     tile.style.setProperty('--ih', String(piece.h));
-    tile.innerHTML = piece.type==='goal' ? '<b>EXIT</b>' : piece.type==='green' ? '═' : piece.type==='blue' ? '▯' : '•';
+    tile.innerHTML = piece.type==='goal' ? '<b>EXIT</b>' : piece.type==='green' ? '◇' : piece.type==='blue' ? '▯' : '◆';
     piece.element = tile;
     introBoard.append(tile);
   }
@@ -66,9 +67,12 @@
   function setProgress(n) {
     currentPercent=Math.max(currentPercent,Math.min(100,n));
     const percentage=Math.round(currentPercent);
-    el('intro-percent').textContent = `${percentage}%`;
     el('intro-fill').style.width = `${currentPercent}%`;
     el('intro-progress').setAttribute('aria-valuenow',String(percentage));
+    // Keep the text at the requested milestones, while the bar eases between them.
+    if (Math.abs(currentPercent-percentage)<0.0001 && [0,10,20,30,50,60,70,80,90,100].includes(percentage)) {
+      el('intro-percent').textContent = `${percentage}%`;
+    }
   }
 
   function animateProgress(target, duration) {
@@ -203,12 +207,31 @@
     if(reducedMotion){setProgress(100);showHome();return;}
     try {
       await pause(270);
-      await movePiece('yellow-left',-1,0,33,'Move 1 / 3 · Clear the left lane');
-      await movePiece('yellow-right',1,0,66,'Move 2 / 3 · Clear the right lane');
-      await movePiece('red-goal',0,1,93,'Move 3 / 3 · Guide the red block down');
+      await movePiece('blue-lower-left',0,-1,10,'Move 1 / 5 · Lower-left blue UP');
+      await movePiece('blue-lower-right',0,-1,20,'Move 2 / 5 · Lower-right blue UP');
+      await movePiece('yellow-lower-left',-1,0,30,'Move 3 / 5 · Bottom-left yellow LEFT');
+      await movePiece('yellow-lower-right',1,0,50,'Move 4 / 5 · Bottom-right yellow RIGHT');
+      await movePiece('red-goal',0,1,60,'Move 5 / 5 · Red block DOWN');
       if(finished)return;
       if(pieceById['red-goal'].x!==1||pieceById['red-goal'].y!==3) throw new Error('Intro goal did not reach exit');
-      await animateProgress(100,230);
+      const finishStages=[
+        [70,'Puzzle solved · The exit is open'],
+        [80,'Preparing your next challenge…'],
+        [90,'Almost ready to play…']
+      ];
+      for(const [percent,description] of finishStages) {
+        if(finished)return;
+        status.textContent=description;
+        await animateProgress(percent,380);
+        await pause(100);
+      }
+      // Do not claim 100% until browser assets have finished loading.
+      if(document.readyState!=='complete') {
+        status.textContent='Finishing game startup…';
+        await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
+      }
+      if(finished)return;
+      await animateProgress(100,400);
       await exitStage();
       await pause(160);
     } catch(e) {
