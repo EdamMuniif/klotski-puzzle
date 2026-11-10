@@ -60,8 +60,9 @@
     moving.x+=dx;moving.y+=dy;
     moving.element.style.setProperty('--ix', String(moving.x));
     moving.element.style.setProperty('--iy', String(moving.y));
-    await Promise.all([pause(610), animateProgress(percentage, 610)]);
-    await pause(100);
+    // The progress bar advances for exactly as long as the tile takes to slide.
+    await Promise.all([pause(900), animateProgress(percentage, 900)]);
+    await pause(90);
   }
 
   function setProgress(n) {
@@ -69,10 +70,10 @@
     const percentage=Math.round(currentPercent);
     el('intro-fill').style.width = `${currentPercent}%`;
     el('intro-progress').setAttribute('aria-valuenow',String(percentage));
-    // Keep the text at the requested milestones, while the bar eases between them.
-    if (Math.abs(currentPercent-percentage)<0.0001 && [0,10,20,30,50,60,70,80,90,100].includes(percentage)) {
-      el('intro-percent').textContent = `${percentage}%`;
-    }
+    // Text steps through the requested milestones, in sync with the sliding tiles.
+    const milestones=[0,10,20,30,50,60,70,80,90,100];
+    const displayed=milestones.filter(step=>step<=currentPercent+0.001).at(-1) ?? 0;
+    el('intro-percent').textContent = `${displayed}%`;
   }
 
   function animateProgress(target, duration) {
@@ -207,31 +208,22 @@
     if(reducedMotion){setProgress(100);showHome();return;}
     try {
       await pause(270);
-      await movePiece('blue-lower-left',0,-1,10,'Move 1 / 5 · Lower-left blue UP');
-      await movePiece('blue-lower-right',0,-1,20,'Move 2 / 5 · Lower-right blue UP');
-      await movePiece('yellow-lower-left',-1,0,30,'Move 3 / 5 · Bottom-left yellow LEFT');
-      await movePiece('yellow-lower-right',1,0,50,'Move 4 / 5 · Bottom-right yellow RIGHT');
-      await movePiece('red-goal',0,1,60,'Move 5 / 5 · Red block DOWN');
+      // One piece moves during each progress interval. All requested
+      // milestones appear naturally as the progress bar passes through them.
+      await movePiece('blue-lower-left',0,-1,20,'Move 1 / 5 · Lower-left blue UP');
+      await movePiece('blue-lower-right',0,-1,30,'Move 2 / 5 · Lower-right blue UP');
+      await movePiece('yellow-lower-left',-1,0,50,'Move 3 / 5 · Bottom-left yellow LEFT');
+      await movePiece('yellow-lower-right',1,0,70,'Move 4 / 5 · Bottom-right yellow RIGHT');
       if(finished)return;
-      if(pieceById['red-goal'].x!==1||pieceById['red-goal'].y!==3) throw new Error('Intro goal did not reach exit');
-      const finishStages=[
-        [70,'Puzzle solved · The exit is open'],
-        [80,'Preparing your next challenge…'],
-        [90,'Almost ready to play…']
-      ];
-      for(const [percent,description] of finishStages) {
-        if(finished)return;
-        status.textContent=description;
-        await animateProgress(percent,380);
-        await pause(100);
-      }
-      // Do not claim 100% until browser assets have finished loading.
+      // The last tile completes only once the page is ready.
       if(document.readyState!=='complete') {
-        status.textContent='Finishing game startup…';
+        status.textContent='Preparing final escape…';
         await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
       }
       if(finished)return;
-      await animateProgress(100,400);
+      await movePiece('red-goal',0,1,100,'Move 5 / 5 · Red block DOWN');
+      if(finished)return;
+      if(pieceById['red-goal'].x!==1||pieceById['red-goal'].y!==3) throw new Error('Intro goal did not reach exit');
       await exitStage();
       await pause(160);
     } catch(e) {
