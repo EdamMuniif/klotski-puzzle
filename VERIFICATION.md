@@ -1,25 +1,26 @@
-# Version 7 — Verification
+# Version 10 — Local Verification
 
 ## Scope
 
-Verified using Chromium 144 with Playwright. The browser's environment blocked direct navigation to local files and localhost, so the test harness loaded the exact HTML markup and injected the two checked scripts in the same order as the `defer` tags on the real site. No production GitHub Pages deployment was tested.
+Published source is Version 9's tested completion-game implementation with Version 10 branding and a responsive home-screen CSS adjustment. The underlying `game-v9.js` and `intro-v9.js` files are byte-for-byte identical to the Version 9 release package.
 
-## Results
+## Checks completed
 
-- **Intro board:** 10 pieces occupy 18 of the 20 cells, leaving two empty cells; four yellow 1×1 blocks, two blue vertical blocks, three green horizontal blocks, and one red 2×2 block.
-- **Three-move path:** left yellow from (2,5) to (1,5); right yellow from (3,5) to (4,5); red block from (2,3) to (2,4). Each move is legal in the current board state. The red block ends at the bottom-center goal and animates through the exit at 100%.
-- **Responsive views:** 320×568, 390×844, 768×1024 and 1440×900; intro, home and game displayed with no horizontal overflow.
-- **Transition:** progress reaches 100%; intro hides; home appears; clicking Play opens the current game board (10 pieces).
-- **Navigation:** Start Playing, Choose a Level and Home navigation all tested.
-- **Skip intro:** immediately opens home and stays stable after the original sequence would have ended.
-- **Reduced motion:** skips the sequence and opens home without animation.
-- **Persistence:** seeded V6 save with Easy Level 1 complete and three used hints on Easy Level 2. Home displayed Easy 2; gameplay displayed 1/4 remaining hints.
-- **Hidden game input:** arrow keys pressed on home did not move game pieces.
-- **Victory regression:** solved Easy Level 1 in browser; in-game red exit animation completed; Continue moved to Easy Level 2; home count updated to 1.
-- **Engine preserved:** the bundled `game-v6.js` matches the original Version 6 ZIP byte-for-byte.
-- **Syntax:** both JavaScript files passed Node.js `--check`.
-- **JavaScript errors:** none in the checked flows.
+- Both JavaScript files pass `node --check`.
+- Browser-based Chromium checks using the exact HTML/CSS/JavaScript contents loaded into the DOM (localhost and external navigation blocked in the test environment).
+- Home viewport fit, without page or home-card scrolling, at 320×568, 360×640, 390×844, 430×932, 768×1024, 1024×768, 1440×900, 844×390, and 667×375.
+- Title **The Sliding Kingdom**, subtitle **Escape the Grid**, tagline, creator credit, document title and 30-level dataset verified.
+- Intro runs three Klotski moves, reaches 100%, and transitions to home.
+- Home navigation and level-selection dialog work.
+- How to Play dialog and theme switching work.
+- Easy 1 played to completion in the shortest 10 moves using the built-in move solver, followed by the existing red-block exit animation and Level Complete screen.
+- Replay preserved the best result and returned to the same level; completing it again allowed Next Level to open Easy 2; Home returned successfully.
+- No browser JavaScript errors detected in the exercised paths.
 
-## Limitations
+## Compatibility and limitations
 
-The opening's displayed percentage represents progress through a deliberate three-move animation, not actual downloaded bytes or server request progress. Physical mobile devices were not tested. The Version 7 source has been committed to GitHub `main`; production GitHub Pages operation was not part of these local tests.
+- Original progress key: `klotski-puzzle-progress-v6`; theme key: `klotski-interface-theme-v8` (not changed).
+- No underlying game rules, puzzles, move solver, hint consumption, or intro timing were changed.
+- CSS/JS were injected inline during automated tests; the release references these exact assets as separate files.
+- Physical Android and iPhone devices, Safari, Firefox, and production GitHub Pages deployment have **not** been independently tested in this validation.
+- The 0–100% intro is a choreographed animation, not network transfer progress.
