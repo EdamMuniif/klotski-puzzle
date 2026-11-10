@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#08182c" />
-  <meta name="description" content="Klotski Hard Mode — 12 challenging sliding-block puzzles with verified minimum moves." />
-  <title>Klotski — Hard Mode</title>
+  <meta name="description" content="Klotski Puzzle — 30 verified Easy, Medium and Hard sliding-block puzzles with four hints per level." />
+  <title>Klotski — Puzzle Challenge</title>
   <style>
     :root{color-scheme:dark;--bg:#071525;--panel:#0e2137;--line:#29425d;--text:#eef7ff;--muted:#99b2c9;--blue:#2e91ff;--royal:#215fe0;--cyan:#5cdae8;--gold:#f5c66d;--gap:5px}
     *{box-sizing:border-box} html{min-height:100%;background:var(--bg)} body{margin:0;min-height:100vh;background:radial-gradient(circle at 8% 5%,#173e69 0,transparent 35%),radial-gradient(circle at 92% 80%,#082b55 0,transparent 32%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
@@ -91,17 +91,29 @@
     @media(max-width:359px){.app{padding-inline:8px}.game-card{padding-inline:9px}.level-btn{min-height:58px}.stat span{font-size:8px}}
     @media(hover:none){button:hover:not(:disabled){filter:none}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+    /* V5: group selector and color legend matching the handwritten diagrams. */
+    .group-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:16px}
+    .group-btn{min-width:0;min-height:55px;border:1px solid #365979;border-radius:12px;background:#0e2a47;color:#d8ecff;font-size:13px;font-weight:800;padding:8px 3px}
+    .group-btn .group-count{display:block;font-size:10px;color:#a1bed6;margin-top:4px}
+    .group-btn.active{background:linear-gradient(130deg,#267de2,#224cba);border-color:#9bd2ff;box-shadow:0 0 0 2px #4e9cfb33}
+    .tile.goal{background:linear-gradient(140deg,#e36251,#b12e25);border-color:#ff9b8e}
+    .tile.vertical{background:linear-gradient(140deg,#376bd0,#1c468f);border-color:#86aaf1}
+    .tile.horizontal{background:linear-gradient(140deg,#82ba67,#3e8544);border-color:#b5e79f}
+    .tile.small{background:linear-gradient(140deg,#f5d85f,#c59c29);border-color:#ffe89a}
+    .tile.small .mark{color:#443600;text-shadow:none}
+    @media(max-width:359px){.group-tabs{gap:4px}.group-btn{font-size:12px;padding:6px 2px}}
   </style>
 </head>
 <body>
  <main class="app">
   <header class="header">
-   <div><div class="eyebrow"><span class="dot"></span> Adult logic challenge</div><h1>Klotski <span style="color:#63adff">Hard Mode</span></h1><p class="subtitle">No beginner levels. Twelve demanding puzzles, starting at 60 optimal moves.</p></div>
-   <div class="header-actions"><div class="topchip" id="progress-chip" aria-live="polite">◆ 1 / 12 unlocked</div><a class="jump" href="#level-selection">Choose level ↓</a></div>
+   <div><div class="eyebrow"><span class="dot"></span> 30 verified challenges</div><h1>Klotski <span style="color:#63adff">Puzzle Challenge</span></h1><p class="subtitle">Play 9 Easy, 9 Medium and 12 Classic Hard puzzles. Choose a difficulty anytime.</p></div>
+   <div class="header-actions"><div class="topchip" id="progress-chip" aria-live="polite">◆ 0 / 30 completed</div><a class="jump" href="#level-selection">Choose level ↓</a></div>
   </header>
   <section class="shell" aria-label="Klotski game">
    <article class="game-card">
-    <div class="level-head"><div><span class="level-small" id="level-number">LEVEL 01 / 12</span><h2 id="level-name">The Gauntlet</h2></div><span class="difficulty" id="difficulty">Hard</span></div>
+    <div class="level-head"><div><span class="level-small" id="level-number">HARD 01 / 12</span><h2 id="level-name">The Gauntlet</h2></div><span class="difficulty" id="difficulty">Hard</span></div>
     <div class="stats"><div class="stat"><strong id="move-count">0</strong><span>Moves</span></div><div class="stat"><strong id="target-count">60</strong><span>Shortest route</span></div><div class="stat"><strong id="best-count">—</strong><span>Best</span></div></div>
     <div class="board-outer"><div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski puzzle board: four columns by five rows"></div></div><div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div></div>
     <div class="result" id="message" aria-live="polite">Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.</div>
@@ -109,121 +121,13 @@
     <button class="action primary" id="next" type="button" style="width:100%;margin-top:9px;display:none">Next level →</button>
    </article>
    <aside>
-    <section class="side-card" id="level-selection"><div class="side-title"><h3>Challenge levels</h3><span class="smallnote" id="completed-count">0 / 12 completed</span></div><div class="levels" id="levels"></div></section>
-    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#65b3ff">blue 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Clear a level to unlock the next.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
-    <section class="side-card"><div class="tip"><b>Hard mode:</b> No warm-up levels. The shortest solutions range from 60 to 116 moves. Each level has 4 hints in total; the remaining count is saved on this device and does not reset when restarting. Hints calculate a shortest route from your current board.</div></section>
+    <section class="side-card" id="level-selection"><div class="side-title"><h3>Select your level</h3><span class="smallnote" id="completed-count">0 / 12 completed</span></div><div class="group-tabs" id="group-tabs" role="group" aria-label="Puzzle difficulty"><button class="group-btn" type="button" data-group="Easy">Easy<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Medium">Medium<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Hard">Hard<span class="group-count">0/12</span></button></div><div class="levels" id="levels"></div></section>
+    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#ff756d">red 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Finish a level to unlock the next in the same group. Every group is available from the start.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
+    <section class="side-card"><div class="tip"><b>Choose your challenge:</b> Easy (10–26 moves), Medium (87–96 moves) or classic Hard (60–116 moves). The four hints for each level are saved on this device and do not reset on restart. Previous Hard-mode scores and hints are preserved.</div></section>
    </aside>
   </section>
-  <p class="footer">Klotski Hard Mode · 12 verified challenges · Works offline · No sign-in required</p>
+  <p class="footer">Klotski Puzzle · 30 verified challenges · Works offline · No sign-in required</p>
  </main>
- <script>
- 'use strict';
- const LEVELS = [
-  {"name":"The Gauntlet","difficulty":"Hard","minimum":60,"positions":[2,8,0,10,12,13,1,5,15,18]},
-  {"name":"Crosscurrent","difficulty":"Hard","minimum":65,"positions":[2,8,0,12,13,15,1,5,14,18]},
-  {"name":"Narrow Escape","difficulty":"Hard","minimum":70,"positions":[2,10,0,9,12,15,1,8,14,18]},
-  {"name":"Deadlock Breaker","difficulty":"Hard","minimum":75,"positions":[2,10,4,5,13,15,0,12,14,18]},
-  {"name":"Pressure Grid","difficulty":"Expert","minimum":80,"positions":[2,10,1,4,9,15,0,12,16,18]},
-  {"name":"The Switchback","difficulty":"Expert","minimum":85,"positions":[2,9,1,4,11,14,0,12,16,19]},
-  {"name":"The Iron Maze","difficulty":"Expert","minimum":90,"positions":[2,9,1,11,12,14,4,13,17,19]},
-  {"name":"Critical Shift","difficulty":"Expert","minimum":95,"positions":[1,9,0,3,12,14,8,13,17,19]},
-  {"name":"Double Bind","difficulty":"Expert","minimum":100,"positions":[1,10,0,3,8,14,9,16,17,19]},
-  {"name":"Endgame","difficulty":"Master","minimum":104,"positions":[1,9,0,3,8,14,11,13,16,17]},
-  {"name":"Grandmaster","difficulty":"Master","minimum":110,"positions":[1,8,0,3,12,15,10,13,17,18]},
-  {"name":"The Classic","difficulty":"Master","minimum":116,"positions":[1,9,0,3,8,11,13,14,16,19]}
- ];
- const SHAPES=[{w:2,h:2,type:'goal',label:'ESCAPE'}, {w:2,h:1,type:'horizontal',label:'—'}, ...Array.from({length:4},()=>({w:1,h:2,type:'vertical',label:'▯'})), ...Array.from({length:4},()=>({w:1,h:1,type:'small',label:'·'}))];
- const DIRECTION={up:[0,-1,'↑'],down:[0,1,'↓'],left:[-1,0,'←'],right:[1,0,'→']};
- const $=id=>document.getElementById(id);
- const STORAGE_KEY='klotski-hard-mode-progress-v2';
- const MAX_HINTS_PER_LEVEL=4;
- let saved=loadProgress();
- let index=0,blocks=[],selected=0,moves=0,history=[],completed=false,hintId=null;
- const board=$('board');
- const masks=SHAPES.map(shape=>Array.from({length:20},(_,p)=>{
-  const x=p%4,y=Math.floor(p/4);if(x+shape.w>4||y+shape.h>5)return 0;
-  let mask=0;for(let yy=0;yy<shape.h;yy++)for(let xx=0;xx<shape.w;xx++)mask|=1<<((y+yy)*4+x+xx);return mask;
- }));
- function loadProgress(){try{let p=JSON.parse(localStorage.getItem(STORAGE_KEY));if(!p||typeof p!=='object'||Array.isArray(p))throw Error();const hintsUsed={};if(p.hintsUsed&&typeof p.hintsUsed==='object'&&!Array.isArray(p.hintsUsed)){for(let n=0;n<LEVELS.length;n++){const used=p.hintsUsed[n];if(Number.isInteger(used)&&used>0)hintsUsed[n]=Math.min(MAX_HINTS_PER_LEVEL,used);}}return {unlocked:Math.max(1,Math.min(12,Number(p.unlocked)||1)),best:p.best||{},hintsUsed};}catch{return {unlocked:1,best:{},hintsUsed:{}};}}
- function storeProgress(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saved));}catch{/* private mode */}}
- function hintsRemaining(level=index){return Math.max(0,MAX_HINTS_PER_LEVEL-(saved.hintsUsed[level]||0));}
- function initializeLevel(n){if(n<0||n>=LEVELS.length||n>=saved.unlocked)return;index=n;blocks=LEVELS[n].positions.map((position,id)=>({id,x:position%4,y:Math.floor(position/4),...SHAPES[id]}));selected=0;moves=0;history=[];completed=false;hintId=null;setMessage('Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.');render();}
- function setMessage(text,success=false){const m=$('message');m.innerHTML=text;m.classList.toggle('success',success);}
- function render(){
-  const lvl=LEVELS[index];$('level-number').textContent=`LEVEL ${String(index+1).padStart(2,'0')} / ${LEVELS.length}`;
-  $('level-name').textContent=lvl.name;$('difficulty').textContent=lvl.difficulty;$('move-count').textContent=moves;$('target-count').textContent=lvl.minimum;
-  $('best-count').textContent=saved.best[index]??'—';$('progress-chip').textContent=`◆ ${saved.unlocked} / ${LEVELS.length} unlocked`;
-  $('completed-count').textContent=`${Object.keys(saved.best).length} / 12 completed`;
-  board.innerHTML='';blocks.forEach(b=>{
-   const tile=document.createElement('button');tile.type='button';tile.className=`tile ${b.type}${selected===b.id?' selected':''}${hintId===b.id?' hinted':''}`;
-   tile.style.left=`calc(${b.x*25}% + var(--gap))`;tile.style.top=`calc(${b.y*20}% + var(--gap))`;
-   tile.style.width=`calc(${b.w*25}% - var(--gap) * 2)`;tile.style.height=`calc(${b.h*20}% - var(--gap) * 2)`;
-   tile.setAttribute('aria-label',`${b.type==='goal'?'Escape block':b.type+' block '+(b.id+1)}, column ${b.x+1}, row ${b.y+1}`);
-   tile.setAttribute('aria-pressed',String(selected===b.id));
-   tile.innerHTML=b.type==='goal'?'<span class="mark">◆</span><span class="tilelabel">ESCAPE</span>':b.type==='horizontal'?'<span class="mark">═</span>':b.type==='vertical'?'<span class="mark">▯</span>':'<span class="mark">•</span>';
-   let pointerStart=null;
-   tile.addEventListener('pointerdown',e=>{pointerStart={x:e.clientX,y:e.clientY};try{tile.setPointerCapture(e.pointerId);}catch{}});
-   tile.addEventListener('pointerup',e=>{
-    let dx=0,dy=0;
-    if(pointerStart){dx=e.clientX-pointerStart.x;dy=e.clientY-pointerStart.y;pointerStart=null;}
-    select(b.id);
-    if(Math.max(Math.abs(dx),Math.abs(dy))>19){const dir=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');moveSelected(dir);}
-   });
-   tile.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){select(b.id);}});
-   board.append(tile);
-  });
-  const grid=$('levels');grid.innerHTML='';LEVELS.forEach((l,i)=>{
-   const btn=document.createElement('button');btn.type='button';const locked=i>=saved.unlocked;
-   btn.className=`level-btn${i===index?' active':''}${locked?' locked':''}${saved.best[i]!=null?' won':''}`;
-   btn.innerHTML=`${locked?'🔒':i+1}<span>${saved.best[i]!=null?'✓ Solved':locked?'Locked':l.minimum+' optimal'}</span>`;
-   btn.disabled=locked;btn.setAttribute('aria-label',locked?`Level ${i+1} locked`:`Level ${i+1}: ${l.name}`);btn.addEventListener('click',()=>{initializeLevel(i);document.querySelector('.game-card').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});grid.append(btn);
-  });
-  $('undo').disabled=history.length===0;const left=hintsRemaining();$('hint').textContent=`✧ Hint (${left}/${MAX_HINTS_PER_LEVEL})`;$('hint').disabled=completed||left===0;$('hint').setAttribute('aria-label',`Hint: ${left} of ${MAX_HINTS_PER_LEVEL} remaining for this level`);
-  $('next').style.display=completed&&index+1<saved.unlocked?'block':'none';
- }
- function select(id){if(completed)return;selected=id;hintId=null;board.querySelectorAll('.tile').forEach((tile,i)=>{tile.classList.toggle('selected',i===id);tile.classList.remove('hinted');tile.setAttribute('aria-pressed',String(i===id));});}
- function canMove(id,dx,dy){const b=blocks[id],nx=b.x+dx,ny=b.y+dy;if(nx<0||ny<0||nx+b.w>4||ny+b.h>5)return false;return !blocks.some(other=>other.id!==id&&nx<other.x+other.w&&nx+b.w>other.x&&ny<other.y+other.h&&ny+b.h>other.y);}
- function moveSelected(dir){if(completed||selected==null)return;const [dx,dy]=DIRECTION[dir];if(!canMove(selected,dx,dy)){setMessage('That direction is blocked. Try moving another piece.');return;}
-  history.push({positions:blocks.map(b=>[b.x,b.y]),selected,moves});blocks[selected].x+=dx;blocks[selected].y+=dy;moves++;hintId=null;
-  if(blocks[0].x===1&&blocks[0].y===3){completed=true;if(saved.best[index]===undefined||moves<saved.best[index])saved.best[index]=moves;saved.unlocked=Math.max(saved.unlocked,Math.min(12,index+2));storeProgress();setMessage(`<b>Level complete!</b> You escaped in ${moves} moves. ${moves===LEVELS[index].minimum?'Perfect shortest solution!':'Shortest possible: '+LEVELS[index].minimum+' moves.'}`,true);}
-  else setMessage(`Keep going. <b>${moves}</b> move${moves===1?'':'s'} made.`);
-  render();
- }
- function undo(){const prev=history.pop();if(!prev)return;blocks.forEach((b,i)=>{b.x=prev.positions[i][0];b.y=prev.positions[i][1];});selected=prev.selected;moves=prev.moves;completed=false;hintId=null;setMessage('Last move undone.');render();}
- function canonicalPositions(){const pos=blocks.map(b=>b.y*4+b.x);return [pos[0],pos[1],...pos.slice(2,6).sort((a,b)=>a-b),...pos.slice(6,10).sort((a,b)=>a-b)];}
- function findShortestNextMove(initial){
-  const start=initial.join(',');if(initial[0]===13)return {remaining:0};
-  const seen=new Map([[start,null]]),queue=[initial];let head=0,end=null;
-  while(head<queue.length){const state=queue[head++];let full=0;for(let i=0;i<10;i++)full|=masks[i][state[i]];
-   for(let i=0;i<10;i++){
-    const p=state[i],x=p%4,y=Math.floor(p/4),rest=full^masks[i][p];
-    for(const [name,[dx,dy]] of Object.entries(DIRECTION)){
-     const nx=x+dx,ny=y+dy;if(nx<0||nx>=4||ny<0||ny>=5)continue;
-     const np=ny*4+nx,mask=masks[i][np];if(!mask||(mask&rest))continue;
-     const next=state.slice();next[i]=np;next.splice(2,4,...next.slice(2,6).sort((a,b)=>a-b));next.splice(6,4,...next.slice(6,10).sort((a,b)=>a-b));
-     const k=next.join(',');if(seen.has(k))continue;
-     seen.set(k,{from:state.join(','),move:{pos:p,direction:name,type:SHAPES[i].type}});
-     if(next[0]===13){end=k;break;}queue.push(next);
-    }
-    if(end)break;
-   }
-   if(end)break;
-  }
-  if(!end)return null;
-  let steps=0,first=null,k=end;while(k!==start){const info=seen.get(k);first=info.move;k=info.from;steps++;}
-  return {...first,remaining:steps};
- }
- function hint(){if(completed)return;if(hintsRemaining()===0){setMessage('No hints left for this level. You can still solve it without hints.');return;}const answer=findShortestNextMove(canonicalPositions());if(!answer||!answer.direction){setMessage('No solution could be found from this position.');return;}
-  const b=blocks.find(piece=>piece.y*4+piece.x===answer.pos&&piece.type===answer.type);
-  if(!b){setMessage('Hint unavailable for this position.');return;}
-  saved.hintsUsed[index]=(saved.hintsUsed[index]||0)+1;storeProgress();
-  selected=b.id;hintId=b.id;const dir=DIRECTION[answer.direction][2];
-  const friendly=b.type==='goal'?'the large blue block':b.type==='horizontal'?'the gold block':b.type==='vertical'?'the highlighted tall block':'the highlighted small block';
-  setMessage(`<b>Hint:</b> Move ${friendly} ${dir}. <b>${answer.remaining}</b> minimum moves remaining. <b>${hintsRemaining()} of ${MAX_HINTS_PER_LEVEL} hints left.</b>`);render();
- }
- $('undo').addEventListener('click',undo);$('restart').addEventListener('click',()=>initializeLevel(index));$('hint').addEventListener('click',hint);$('next').addEventListener('click',()=>initializeLevel(index+1));
- document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;const names={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'};if(names[e.key]){e.preventDefault();moveSelected(names[e.key]);}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}});
- initializeLevel(0);
- </script>
+ <script src="game-v5.js" defer></script>
 </body>
 </html>
