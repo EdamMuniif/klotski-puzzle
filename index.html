@@ -133,7 +133,7 @@
     .intro-stage{--intro-gap:3px;position:relative;width:min(63vw,258px,38svh);max-width:270px;flex-shrink:0;margin:7px 0 1px;filter:drop-shadow(0 16px 25px #020c18a8)}
     .intro-frame{border:5px solid #577fa5;background:#193858;border-radius:17px 17px 11px 11px;padding:5px;box-shadow:inset 0 2px 0 #9ac6ee80,0 0 0 3px #234666b8,0 0 60px #438ada22}
     .intro-board{width:100%;aspect-ratio:4 / 5;position:relative;overflow:hidden;border-radius:9px 9px 4px 4px;background:#07172a;}
-    .intro-piece{position:absolute;left:calc(var(--ix)*25% + var(--intro-gap));top:calc(var(--iy)*20% + var(--intro-gap));width:calc(var(--iw)*25% - 2*var(--intro-gap));height:calc(var(--ih)*20% - 2*var(--intro-gap));display:flex;justify-content:center;align-items:center;border:1px solid #ffffff70;border-radius:clamp(6px,1.6vw,11px);font-weight:900;font-size:clamp(13px,2.2vw,22px);box-shadow:inset 0 3px 3px #ffffff38,inset 0 -5px 8px #0003,0 3px 5px #0009;user-select:none;pointer-events:none;transition:left .9s cubic-bezier(.22,1,.36,1),top .9s cubic-bezier(.22,1,.36,1)}
+    .intro-piece{position:absolute;left:calc(var(--ix)*25% + var(--intro-gap));top:calc(var(--iy)*20% + var(--intro-gap));width:calc(var(--iw)*25% - 2*var(--intro-gap));height:calc(var(--ih)*20% - 2*var(--intro-gap));display:flex;justify-content:center;align-items:center;border:1px solid #ffffff70;border-radius:clamp(6px,1.6vw,11px);font-weight:900;font-size:clamp(13px,2.2vw,22px);box-shadow:inset 0 3px 3px #ffffff38,inset 0 -5px 8px #0003,0 3px 5px #0009;user-select:none;pointer-events:none;transition:left .72s cubic-bezier(.22,1,.36,1),top .72s cubic-bezier(.22,1,.36,1)}
     .intro-piece.green{background:linear-gradient(150deg,#82bc78,#3d8651);color:#eaffdd;text-shadow:0 2px 3px #174028}
     .intro-piece.blue{background:linear-gradient(145deg,#4984e8,#19499f);color:#dfefff}
     .intro-piece.yellow{background:linear-gradient(155deg,#ffe978,#d6ac27);color:#735209}
@@ -178,12 +178,12 @@
  <link rel="stylesheet" href="interface-v10.css" />
 </head>
 <body data-theme="navy">
- <!-- Five-move cinematic loading sequence; gameplay remains unchanged. -->
+ <!-- Ten-move cinematic loading sequence; gameplay remains unchanged. -->
  <section class="intro-screen" id="intro-screen" aria-label="The Sliding Kingdom opening animation">
   <div class="intro-center">
    <div class="intro-kicker">The Sliding Kingdom</div>
    <h2>Find the <em>Exit.</em></h2>
-   <p class="intro-description">Five moves. One escape. Your journey begins.</p>
+   <p class="intro-description">Ten moves. One escape. Your journey begins.</p>
    <div class="intro-stage" id="intro-stage" aria-hidden="true">
     <div class="intro-frame"><div class="intro-board" id="intro-board"></div></div>
     <div class="intro-exit">▼ EXIT ▼</div>
