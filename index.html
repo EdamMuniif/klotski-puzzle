@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#08182c" />
-  <meta name="description" content="Klotski Puzzle — 30 verified Easy, Medium and Hard sliding-block puzzles with four hints per level." />
+  <meta name="description" content="Klotski Puzzle — 30 sequential Easy, Medium and Hard sliding-block puzzles with a smooth exit animation and four hints per level." />
   <title>Klotski — Puzzle Challenge</title>
   <style>
     :root{color-scheme:dark;--bg:#071525;--panel:#0e2137;--line:#29425d;--text:#eef7ff;--muted:#99b2c9;--blue:#2e91ff;--royal:#215fe0;--cyan:#5cdae8;--gold:#f5c66d;--gap:5px}
@@ -103,31 +103,50 @@
     .tile.small{background:linear-gradient(140deg,#f5d85f,#c59c29);border-color:#ffe89a}
     .tile.small .mark{color:#443600;text-shadow:none}
     @media(max-width:359px){.group-tabs{gap:4px}.group-btn{font-size:12px;padding:6px 2px}}
+    /* V6: red goal slides through the gate, followed by a clear next-level invitation. */
+    .board-outer{position:relative;isolation:isolate}
+    .board-outer.escaping .exit-gate{background:#b6ffe2;box-shadow:0 0 25px 8px #37e9b86e;animation:gate-glow .65s ease-in-out infinite alternate}
+    .exit-row{z-index:12;pointer-events:none}
+    .exit-ghost{z-index:11;position:absolute;pointer-events:none;user-select:none;touch-action:none;transition:none;overflow:hidden;box-shadow:0 0 22px #ff6f5466,0 12px 28px #0009}
+    .tile.goal.exit-complete{opacity:0;pointer-events:none}
+    @keyframes gate-glow{from{filter:brightness(1)}to{filter:brightness(1.7)}}
+    .victory-panel:not([hidden]){display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;margin-top:14px;padding:15px;border:1px solid #29856e;border-radius:15px;background:linear-gradient(130deg,#0b3a36,#104a4b);animation:victory-in .35s ease-out}
+    .victory-icon{width:43px;height:43px;display:grid;place-items:center;font-size:25px;color:#ffe59b;border-radius:50%;background:#1a695f;box-shadow:0 0 19px #42efbc44}
+    .victory-text{display:flex;flex-direction:column;gap:4px;min-width:0}.victory-text strong{font-size:16px;color:#e4ffed}.victory-text span{font-size:12px;line-height:1.5;color:#b4e6d6}
+    .continue-btn:not([hidden]){grid-column:1/-1;width:100%;font-size:14px;min-height:50px;background:linear-gradient(115deg,#20a997,#1c70b5);border-color:#80e6d7}
+    [hidden]{display:none!important}
+    @keyframes victory-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .group-btn:disabled{opacity:.48;background:#0a2035;box-shadow:none}
+    @media(prefers-reduced-motion:reduce){.victory-panel:not([hidden]){animation:none}.board-outer.escaping .exit-gate{animation:none}}
   </style>
 </head>
 <body>
  <main class="app">
   <header class="header">
-   <div><div class="eyebrow"><span class="dot"></span> 30 verified challenges</div><h1>Klotski <span style="color:#63adff">Puzzle Challenge</span></h1><p class="subtitle">Play 9 Easy, 9 Medium and 12 Classic Hard puzzles. Choose a difficulty anytime.</p></div>
+   <div><div class="eyebrow"><span class="dot"></span> 30 verified challenges</div><h1>Klotski <span style="color:#63adff">Puzzle Challenge</span></h1><p class="subtitle">Play 9 Easy, 9 Medium and 12 Classic Hard puzzles. Start at Easy Level 1 and unlock the next puzzle after every victory.</p></div>
    <div class="header-actions"><div class="topchip" id="progress-chip" aria-live="polite">◆ 0 / 30 completed</div><a class="jump" href="#level-selection">Choose level ↓</a></div>
   </header>
   <section class="shell" aria-label="Klotski game">
    <article class="game-card">
     <div class="level-head"><div><span class="level-small" id="level-number">HARD 01 / 12</span><h2 id="level-name">The Gauntlet</h2></div><span class="difficulty" id="difficulty">Hard</span></div>
     <div class="stats"><div class="stat"><strong id="move-count">0</strong><span>Moves</span></div><div class="stat"><strong id="target-count">60</strong><span>Shortest route</span></div><div class="stat"><strong id="best-count">—</strong><span>Best</span></div></div>
-    <div class="board-outer"><div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski puzzle board: four columns by five rows"></div></div><div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div></div>
+    <div class="board-outer" id="board-outer"><div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski puzzle board: four columns by five rows"></div></div><div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div></div>
     <div class="result" id="message" aria-live="polite">Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.</div>
     <div class="actions"><button class="action" id="undo" type="button">↶ Undo</button><button class="action" id="restart" type="button">↻ Restart</button><button class="action" id="hint" type="button">✧ Hint (4/4)</button></div>
-    <button class="action primary" id="next" type="button" style="width:100%;margin-top:9px;display:none">Next level →</button>
+    <section class="victory-panel" id="victory" hidden aria-label="Level completion">
+     <div class="victory-icon" aria-hidden="true">★</div>
+     <div class="victory-text"><strong id="victory-title">Level cleared!</strong><span id="victory-detail"></span></div>
+     <button class="action primary continue-btn" id="next" type="button" hidden>Continue → Next Level</button>
+    </section>
    </article>
    <aside>
     <section class="side-card" id="level-selection"><div class="side-title"><h3>Select your level</h3><span class="smallnote" id="completed-count">0 / 12 completed</span></div><div class="group-tabs" id="group-tabs" role="group" aria-label="Puzzle difficulty"><button class="group-btn" type="button" data-group="Easy">Easy<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Medium">Medium<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Hard">Hard<span class="group-count">0/12</span></button></div><div class="levels" id="levels"></div></section>
-    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#ff756d">red 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Finish a level to unlock the next in the same group. Every group is available from the start.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
-    <section class="side-card"><div class="tip"><b>Choose your challenge:</b> Easy (10–26 moves), Medium (87–96 moves) or classic Hard (60–116 moves). The four hints for each level are saved on this device and do not reset on restart. Previous Hard-mode scores and hints are preserved.</div></section>
+    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#ff756d">red 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Begin at Easy Level 1. Each victory unlocks the next level. After Easy 9, continue to Medium 1, then Hard 1.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
+    <section class="side-card"><div class="tip"><b>Level-up journey:</b> Easy (10–26 moves) → Medium (87–96 moves) → Hard (60–116 moves). The four hints for each level are saved on this device and do not reset on restart. Previous Hard-mode scores and hints are preserved.</div></section>
    </aside>
   </section>
   <p class="footer">Klotski Puzzle · 30 verified challenges · Works offline · No sign-in required</p>
  </main>
- <script src="game-v5.js" defer></script>
+ <script src="game-v6.js" defer></script>
 </body>
 </html>
