@@ -7,7 +7,7 @@ A responsive, static Klotski-style sliding-block game, built for phones, tablets
 
 ## What's included
 
-- Version 7 three-move cinematic intro and animated red-block exit (motion logic unchanged).
+- Opens directly to the home menu, without an animated loading screen or opening puzzle.
 - Minimal no-scroll home screen with the new game title, subtitle, tagline, and by AM credit.
 - Single-screen gameplay, level selection popup, rules popup and three selectable themes.
 - Dedicated Level Complete screen: Next Level, Replay Level, Home, move statistics and a themed miniature board.
@@ -16,10 +16,10 @@ A responsive, static Klotski-style sliding-block game, built for phones, tablets
 
 ## Files
 
-- `index.html` — title, home, gameplay, completion, intro and dialogs.
+- `index.html` — title, home, gameplay, completion and dialogs.
 - `interface-v10.css` — responsive layouts and branding.
 - `game-v9.js` — version 9 gameplay engine (unchanged).
-- `intro-v9.js` — version 9 intro, navigation and completion flow (unchanged).
+- `intro-v9.js` — home navigation, themes and completion handling (original filename retained for compatibility).
 
 Open `index.html` in a browser or serve all four files from the repository root. Github Pages uses the existing static Pages workflow.
 
