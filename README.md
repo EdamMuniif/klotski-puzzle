@@ -1,37 +1,25 @@
-# Klotski — Hard Mode (Version 4)
+# Klotski — Puzzle Challenge (Version 5)
 
-An offline-ready, single-file Klotski game with 12 adult-difficulty puzzles and layouts optimized for phones, tablets, and desktop monitors.
+Mobile-first, static Klotski game for phones, tablets, and desktops. Open `index.html` to play offline (keep `game-v5.js` in the same folder). GitHub Pages automatically deploys commits to `main`.
 
-## Run
+## Levels
 
-Open `index.html` in a modern browser. No server, installation, external assets, or internet connection is required.
+- **Easy:** 9 photographed, manually reconstructed puzzles (E01–E09, shortest solutions 10–26 one-cell moves).
+- **Medium:** 9 photographed, manually reconstructed puzzles (M01–M09, shortest solutions 87–96 moves).
+- **Hard / Expert / Master:** existing 12 classic variants (H01–H12, shortest solutions 60–116 moves).
+- A separate level is unlocked within each category. The first level of every category is available immediately, including Hard Mode.
+- Switch categories from the level selection buttons. Four hints per level; counters remain exhausted after restart or refresh.
 
-## Play
+## Controls
 
-- Swipe or drag a block directly on the board using a finger or mouse. On desktop, select a block and use keyboard arrow keys if preferred.
-- Each movement is a one-cell translation. Pieces cannot rotate, overlap or leave the board.
-- Guide the 2×2 blue target block to the bottom-center exit.
-- Undo and restart are available. Each level has **4 shortest-route hints total**. The Hint button shows the number remaining and disables at zero.
-- Clear each level to unlock the next; best scores, unlocks, and per-level hint usage are saved in the browser. Restarting, undoing, switching levels, and refreshing do not replenish hints; other levels keep their separate budgets.
-- On a phone or tablet, use **Choose level** at the top to jump to the level menu.
+Drag or swipe blocks on a phone, tablet, or computer; use arrow keys on desktop after selecting a block. Undo, Restart, and shortest-route Hint are available. Red: goal 2×2; Yellow: small 1×1; Blue: vertical 1×2; Green: horizontal 2×1. Reach the bottom-center exit with the red block.
 
-## Difficulty and verification
+## Progress compatibility
 
-All 12 levels are Hard or above from the beginning; minimum solution lengths: **60, 65, 70, 75, 80, 85, 90, 95, 100, 104, 110, 116** one-cell moves.
+Version 5 stores progress in `klotski-puzzle-progress-v5`, and imports old Hard Mode V4 data from `klotski-hard-mode-progress-v2` on first use. Old data are not deleted. Best scores, unlocked Hard levels and remaining hints are preserved. Each new level has its own independent hint budget.
 
-- Grid: 4 × 5. Pieces: 1 goal 2×2, 4 vertical 1×2, 1 horizontal 2×1, 4 single 1×1; 2 empty cells.
-- All level positions are sampled from a known optimal 116-step solution path for the classic problem.
-- The app's hint algorithm runs breadth-first search using symmetric-piece canonicalization to find shortest moves from the current position.
-- Version 4 stores progress under a separate key from Version 1 so old easy-mode best scores cannot be incorrectly applied to the new puzzles.
+## Puzzle validation
 
-## Version 4 update
+The 18 handwritten layouts came from the user's two photographed puzzle sheets (9 Easy and 9 Medium). All passed geometry checks and independent breadth-first-search solving with replayed optimal solutions. Original solution data and diagrams are retained in the source validation package; the game embeds the 18 coordinate layouts.
 
-- Added a strict, browser-saved limit of four hints for each level. Existing saved progress is preserved. Hints are charged only after the solver identifies a valid next move. The Hint button displays the remaining allowance.
-
-
-- Removed the on-screen direction pad and adjacent instructions to free board space on phones.
-- Preserved swipes, mouse dragging, keyboard arrows, undo, restart, hints, levels, and the same local-storage key for progress when replacing the game at its original URL or file path.
-
-## Supported layouts
-
-Responsive styles for phone portrait (320px+), tablet portrait/landscape and wide desktop monitors. Unnecessary on-screen directional buttons have been removed. Level buttons are 58–70px high and actions at least 48px.
+Note: Medium moves overlap Hard's numerical range. Difficulty labels follow the provided sheets, not a strictly monotonic global move count. Movement is counted in one-cell steps.
