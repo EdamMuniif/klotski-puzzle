@@ -1,35 +1,28 @@
-# Klotski Puzzle Quest — Version 7
+# The Sliding Kingdom — Escape the Grid (Version 10)
 
-A mobile-first, offline-ready Klotski web game with 30 puzzles and a cinematic startup sequence.
+**Tagline:** Slide the Blocks. Solve the Puzzle. Escape the Kingdom.  
+**Creator:** by AM
 
-## New in V7: three-move opening
+A responsive, static Klotski-style sliding-block game, built for phones, tablets, and desktops.
 
-On page load, an illustrated **real 4 × 5 Klotski board** animates exactly three legal one-cell slides:
+## What's included
 
-1. Yellow block at (2,5) slides **left** into the empty space (1,5).
-2. Yellow block at (3,5) slides **right** into the empty space (4,5).
-3. Red 2 × 2 target slides **down** into the bottom-center winning position.
-
-The visual progress meter rises **0 → 33 → 66 → 93 → 100%**, synchronized with the moves. At 100%, the gate glows, the red target **slides completely out** of the board, and the **new Home screen** appears. Players can start/continue the last unlocked puzzle or browse unlocked levels. The intro can be skipped and respects reduced-motion accessibility settings.
-
-> The percentage reports the cinematic opening sequence, not bytes downloaded over the network. The game itself is a static offline-capable HTML/CSS/JS site.
-
-## Preserved gameplay
-
-- 30 levels: 9 Easy → 9 Medium → 12 Hard/Expert/Master.
-- Existing 4 hints per level (persisted on device).
-- Unlocking the next level when the red 2 × 2 block reaches the bottom exit.
-- In-game red-block exit animation and victory panel.
-- Existing game saves and best scores (same `klotski-puzzle-progress-v6` localStorage key).
-- Swipe/drag, keyboard arrows, undo, restart, hint, level selection.
-- Responsive phone, tablet, and desktop presentation.
+- Version 7 three-move cinematic intro and animated red-block exit (motion logic unchanged).
+- Minimal no-scroll home screen with the new game title, subtitle, tagline, and by AM credit.
+- Single-screen gameplay, level selection popup, rules popup and three selectable themes.
+- Dedicated Level Complete screen: Next Level, Replay Level, Home, move statistics and a themed miniature board.
+- 30 validated puzzles: 9 Easy, 9 Medium and 12 Hard, unlocked sequentially.
+- Four hints per level, persistent progress, personal bests, touch/mouse/keyboard controls, undo and restart.
 
 ## Files
 
-- `index.html` — game UI, new intro and home-screen UI.
-- `intro-v7.js` — isolated three-move animation and navigation controller.
-- `game-v6.js` — existing, unchanged puzzle engine and saved progression.
+- `index.html` — title, home, gameplay, completion, intro and dialogs.
+- `interface-v10.css` — responsive layouts and branding.
+- `game-v9.js` — version 9 gameplay engine (unchanged).
+- `intro-v9.js` — version 9 intro, navigation and completion flow (unchanged).
 
-Open `index.html` in a modern browser; no dependencies or build tools are required. For GitHub Pages, place all three files in the repository root.
+Open `index.html` in a browser or serve all four files from the repository root. Github Pages uses the existing static Pages workflow.
 
-**Deployment:** Version 7 is published to the `main` branch. GitHub Pages deployment runs through the existing GitHub Actions workflow; verify the live status in the Actions tab.
+## Compatibility
+
+Player progress remains in `localStorage` under `klotski-puzzle-progress-v6`; theme selection uses `klotski-interface-theme-v8`. These keys are deliberately unchanged so existing players retain data. The GitHub repository name and Pages URL remain `klotski-puzzle`.
