@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#08182c" />
-  <meta name="description" content="Klotski Puzzle Quest — 30 progressively unlocked puzzles, a cinematic three-move opening, smooth exit animation and four hints per level." />
-  <title>Klotski — Puzzle Challenge</title>
+  <meta name="description" content="The Sliding Kingdom — Escape the Grid. Slide the Blocks. Solve the Puzzle. Escape the Kingdom. A 30-level sliding-block game by AM." />
+  <title>The Sliding Kingdom | Escape the Grid — by AM</title>
   <style>
     :root{color-scheme:dark;--bg:#071525;--panel:#0e2137;--line:#29425d;--text:#eef7ff;--muted:#99b2c9;--blue:#2e91ff;--royal:#215fe0;--cyan:#5cdae8;--gold:#f5c66d;--gap:5px}
     *{box-sizing:border-box} html{min-height:100%;background:var(--bg)} body{margin:0;min-height:100vh;background:radial-gradient(circle at 8% 5%,#173e69 0,transparent 35%),radial-gradient(circle at 92% 80%,#082b55 0,transparent 32%),var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
@@ -175,12 +175,13 @@
     @media(max-height:630px){.intro-center{gap:5px}.intro-stage{width:min(55vw,220px,35svh);margin:1px 0}.intro-center h2{font-size:28px}.intro-description{font-size:11px}.intro-meter{margin-top:2px}}
     @media(prefers-reduced-motion:reduce){.intro-piece{transition:none}.intro-screen.leaving,.home-card{transition:none;animation:none}}
   </style>
+ <link rel="stylesheet" href="interface-v10.css" />
 </head>
-<body>
- <!-- V7: Intro uses a real, three-move solvable Klotski state; independent of gameplay. -->
- <section class="intro-screen" id="intro-screen" aria-label="Klotski opening animation">
+<body data-theme="navy">
+ <!-- V7 cinematic opening preserved in appearance and move choreography. -->
+ <section class="intro-screen" id="intro-screen" aria-label="The Sliding Kingdom opening animation">
   <div class="intro-center">
-   <div class="intro-kicker">Klotski puzzle challenge</div>
+   <div class="intro-kicker">The Sliding Kingdom</div>
    <h2>Find the <em>Exit.</em></h2>
    <p class="intro-description">Three moves. One escape. Your journey begins.</p>
    <div class="intro-stage" id="intro-stage" aria-hidden="true">
@@ -194,44 +195,139 @@
   </div>
  </section>
  <section class="home-screen" id="home-screen" aria-labelledby="home-title" hidden>
-  <div class="home-card">
-   <div class="home-emblem" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-   <div class="home-overline">A sliding-block escape adventure</div>
-   <h1 class="home-title" id="home-title" tabindex="-1">Klotski <span>Quest</span></h1>
-   <p class="home-subtitle">Guide the red block to freedom. Start with Easy puzzles and unlock your way through 30 challenges.</p>
-   <div class="home-metrics"><div><strong>30</strong><span>Total levels</span></div><div><strong id="home-solved">0</strong><span>Completed</span></div><div><strong id="home-next">Easy 1</strong><span>Next challenge</span></div></div>
-   <div class="home-actions"><button class="home-start" id="home-start" type="button">▶ Start playing</button><button class="home-browse" id="home-browse" type="button">Choose a level</button></div>
-   <p class="home-foot">Easy → Medium → Hard · 4 hints per level · Progress saved</p>
-  </div>
+   <div class="home-card">
+     <div class="home-brand">
+       <div class="home-emblem" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+       <div class="home-overline">30 Levels · One Way Out</div>
+       <h1 class="home-title" id="home-title" tabindex="-1">THE SLIDING<br><span>KINGDOM</span></h1>
+       <p class="home-series">Escape the Grid</p>
+       <p class="home-tagline">Slide the Blocks. Solve the Puzzle. Escape the Kingdom.</p>
+       <p class="home-author">by AM</p>
+     </div>
+     <div class="home-menu">
+       <div class="home-metrics" aria-label="Game progress">
+         <div><strong>30</strong><span>Levels</span></div>
+         <div><strong id="home-solved">0</strong><span>Completed</span></div>
+         <div><strong id="home-next">Easy 1</strong><span>Next</span></div>
+       </div>
+       <div class="home-actions">
+         <button class="home-start" id="home-start" type="button">▶ Start playing</button>
+         <div class="home-menu-grid">
+           <button class="home-browse" id="home-browse" type="button"><span aria-hidden="true">▦</span> Levels</button>
+           <button class="home-browse" id="home-theme" type="button"><span aria-hidden="true">◐</span> Theme</button>
+           <button class="home-browse" id="home-rules" type="button"><span aria-hidden="true">ⓘ</span> How to play</button>
+         </div>
+       </div>
+       <p class="home-foot">Easy · Medium · Hard <span aria-hidden="true">•</span> 4 hints per level</p>
+     </div>
+   </div>
  </section>
 
- <main class="app" id="game-screen" hidden>
-  <header class="header">
-   <div><div class="eyebrow"><span class="dot"></span> 30 verified challenges</div><h1>Klotski <span style="color:#63adff">Puzzle Challenge</span></h1><p class="subtitle">Play 9 Easy, 9 Medium and 12 Classic Hard puzzles. Start at Easy Level 1 and unlock the next puzzle after every victory.</p></div>
-   <div class="header-actions"><button class="home-return" type="button" id="return-home">⌂ Home</button><div class="topchip" id="progress-chip" aria-live="polite">◆ 0 / 30 completed</div><a class="jump" href="#level-selection">Choose level ↓</a></div>
-  </header>
-  <section class="shell" aria-label="Klotski game">
-   <article class="game-card">
-    <div class="level-head"><div><span class="level-small" id="level-number">HARD 01 / 12</span><h2 id="level-name" tabindex="-1">The Gauntlet</h2></div><span class="difficulty" id="difficulty">Hard</span></div>
-    <div class="stats"><div class="stat"><strong id="move-count">0</strong><span>Moves</span></div><div class="stat"><strong id="target-count">60</strong><span>Shortest route</span></div><div class="stat"><strong id="best-count">—</strong><span>Best</span></div></div>
-    <div class="board-outer" id="board-outer"><div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski puzzle board: four columns by five rows"></div></div><div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div></div>
-    <div class="result" id="message" aria-live="polite">Swipe or drag a block toward an empty space. Desktop: select a block and use arrow keys.</div>
-    <div class="actions"><button class="action" id="undo" type="button">↶ Undo</button><button class="action" id="restart" type="button">↻ Restart</button><button class="action" id="hint" type="button">✧ Hint (4/4)</button></div>
-    <section class="victory-panel" id="victory" hidden aria-label="Level completion">
-     <div class="victory-icon" aria-hidden="true">★</div>
-     <div class="victory-text"><strong id="victory-title">Level cleared!</strong><span id="victory-detail"></span></div>
-     <button class="action primary continue-btn" id="next" type="button" hidden>Continue → Next Level</button>
-    </section>
-   </article>
-   <aside>
-    <section class="side-card" id="level-selection"><div class="side-title"><h3>Select your level</h3><span class="smallnote" id="completed-count">0 / 12 completed</span></div><div class="group-tabs" id="group-tabs" role="group" aria-label="Puzzle difficulty"><button class="group-btn" type="button" data-group="Easy">Easy<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Medium">Medium<span class="group-count">0/9</span></button><button class="group-btn" type="button" data-group="Hard">Hard<span class="group-count">0/12</span></button></div><div class="levels" id="levels"></div></section>
-    <section class="side-card"><h3>How to play</h3><ol class="mini-list"><li>Swipe or drag blocks on touchscreens and with a mouse. On desktop, you can also select a block and press the arrow keys.</li><li>Move blocks into the empty spaces.</li><li>Blocks slide one square at a time. They cannot rotate or overlap.</li><li>Guide the large <b style="color:#ff756d">red 2×2 block</b> to the glowing bottom exit.</li><li>Every starting board is solvable. Begin at Easy Level 1. Each victory unlocks the next level. After Easy 9, continue to Medium 1, then Hard 1.</li><li>Each level has only <b>4 hints total</b>. Restarting does not restore them.</li></ol></section>
-    <section class="side-card"><div class="tip"><b>Level-up journey:</b> Easy (10–26 moves) → Medium (87–96 moves) → Hard (60–116 moves). The four hints for each level are saved on this device and do not reset on restart. Previous Hard-mode scores and hints are preserved.</div></section>
-   </aside>
-  </section>
-  <p class="footer">Klotski Puzzle · 30 verified challenges · Works offline · No sign-in required</p>
+ <main class="app" id="game-screen" aria-label="The Sliding Kingdom gameplay" hidden>
+   <header class="game-topbar">
+     <button class="home-return" type="button" id="return-home" aria-label="Return to home screen">← Home</button>
+     <div class="game-topbrand">SLIDING <span>KINGDOM</span></div>
+     <span class="topchip" id="progress-chip" aria-live="polite">◆ 0 / 30</span>
+   </header>
+   <section class="shell" aria-label="Klotski puzzle">
+     <article class="game-card">
+       <div class="level-head">
+         <div class="level-heading"><span class="level-small" id="level-number">LEVEL 1 / 30</span><h2 id="level-name" tabindex="-1">Easy Challenge 1</h2></div>
+         <span class="difficulty" id="difficulty">Easy</span>
+       </div>
+       <div class="stats" aria-label="Move statistics">
+         <div class="stat"><strong id="move-count">0</strong><span>Moves</span></div>
+         <div class="stat"><strong id="target-count">10</strong><span>Shortest</span></div>
+         <div class="stat"><strong id="best-count">—</strong><span>Best</span></div>
+       </div>
+       <div class="board-outer" id="board-outer">
+         <div class="board-frame"><div class="board" id="board" role="group" aria-label="Klotski sliding puzzle, four columns by five rows"></div></div>
+         <div class="exit-row"><div class="exit-gate"></div><span class="exit-label">▼ EXIT ▼</span></div>
+       </div>
+       <div class="result" id="message" aria-live="polite">Slide the red square to the bottom exit.</div>
+       <div class="actions">
+         <button class="action" id="undo" type="button">↶ Undo</button>
+         <button class="action" id="restart" type="button">↻ Restart</button>
+         <button class="action" id="hint" type="button">✧ Hint (4/4)</button>
+       </div>
+     </article>
+   </section>
  </main>
- <script src="game-v6.js" defer></script>
- <script src="intro-v7.js" defer></script>
+
+ <section class="complete-screen" id="complete-screen" aria-labelledby="complete-title" hidden>
+   <div class="complete-card">
+     <p class="complete-eyebrow"><span class="complete-spark" aria-hidden="true">✦</span> PUZZLE SOLVED <span class="complete-spark" aria-hidden="true">✦</span></p>
+     <h2 class="complete-title" id="complete-title" tabindex="-1">Level Complete!</h2>
+     <p class="complete-subtitle" id="complete-subtitle">Easy · Level 1 of 30</p>
+     <div class="complete-art" aria-hidden="true">
+       <div class="complete-board">
+         <span class="complete-piece green" style="--cx:0;--cy:0;--cw:2;--ch:1">═</span>
+         <span class="complete-piece green" style="--cx:2;--cy:0;--cw:2;--ch:1">═</span>
+         <span class="complete-piece green" style="--cx:1;--cy:1;--cw:2;--ch:1">═</span>
+         <span class="complete-piece blue" style="--cx:0;--cy:1;--cw:1;--ch:2">▯</span>
+         <span class="complete-piece blue" style="--cx:3;--cy:1;--cw:1;--ch:2">▯</span>
+         <span class="complete-piece yellow" style="--cx:1;--cy:2;--cw:1;--ch:1">•</span>
+         <span class="complete-piece yellow" style="--cx:2;--cy:2;--cw:1;--ch:1">•</span>
+         <span class="complete-piece yellow" style="--cx:0;--cy:3;--cw:1;--ch:1">•</span>
+         <span class="complete-piece yellow" style="--cx:3;--cy:3;--cw:1;--ch:1">•</span>
+         <span class="complete-piece red" style="--cx:1;--cy:3;--cw:2;--ch:2">◆</span>
+       </div>
+       <div class="complete-gate"></div>
+       <p class="complete-exit">▼ EXIT CLEARED ▼</p>
+     </div>
+     <div class="complete-stats" aria-label="Level results">
+       <div><strong id="complete-moves">0</strong><span>YOUR MOVES</span></div>
+       <div><strong id="complete-optimal">0</strong><span>SHORTEST</span></div>
+       <div><strong id="complete-best">0</strong><span>BEST</span></div>
+     </div>
+     <p class="complete-message" id="complete-message" aria-live="polite">Great job! The red block escaped.</p>
+     <div class="complete-buttons">
+       <button class="complete-primary" id="complete-next" type="button">Next Level →</button>
+       <div class="complete-secondary-row">
+         <button class="complete-secondary" id="complete-replay" type="button">↻ Replay Level</button>
+         <button class="complete-secondary" id="complete-home" type="button">⌂ Home</button>
+       </div>
+     </div>
+     <p class="complete-note">Replay keeps your best score and used hints.</p>
+   </div>
+ </section>
+
+ <dialog class="menu-dialog" id="levels-dialog" aria-labelledby="levels-title">
+   <div class="dialog-head"><div><p class="dialog-eyebrow">SELECT CHALLENGE</p><h2 id="levels-title">Choose a level</h2></div><button type="button" class="dialog-close" data-close-dialog="levels-dialog" aria-label="Close level selection">✕</button></div>
+   <section id="level-selection" aria-label="Level selection">
+      <div class="level-dialog-progress"><span id="completed-count">0 / 30 completed</span><span>Finish a level to unlock the next</span></div>
+      <div class="group-tabs" id="group-tabs" role="group" aria-label="Puzzle difficulty">
+        <button class="group-btn" type="button" data-group="Easy">Easy<span class="group-count">0/9</span></button>
+        <button class="group-btn" type="button" data-group="Medium">Medium<span class="group-count">0/9</span></button>
+        <button class="group-btn" type="button" data-group="Hard">Hard<span class="group-count">0/12</span></button>
+      </div>
+      <div class="levels" id="levels" aria-label="Level grid"></div>
+   </section>
+ </dialog>
+
+ <dialog class="menu-dialog info-dialog" id="rules-dialog" aria-labelledby="rules-title">
+   <div class="dialog-head"><div><p class="dialog-eyebrow">GAME GUIDE</p><h2 id="rules-title">How to play</h2></div><button type="button" class="dialog-close" data-close-dialog="rules-dialog" aria-label="Close game instructions">✕</button></div>
+   <ol class="rules-list">
+     <li><b>Move the blocks.</b> Drag or swipe a piece on a phone or tablet. On desktop, drag with a mouse or select a piece and use the arrow keys.</li>
+     <li><b>Use empty spaces.</b> Blocks move one cell at a time; they cannot overlap or rotate.</li>
+     <li><b>Reach the exit.</b> Slide the red 2×2 block to the glowing bottom-center exit.</li>
+     <li><b>Level up.</b> Clear Easy 1–9, Medium 1–9, then Hard 1–12. Finished levels can be replayed.</li>
+     <li><b>Use hints carefully.</b> Each level has four total hints. Undo, restart, or reloading will not restore spent hints.</li>
+   </ol>
+   <button type="button" class="dialog-primary" data-close-dialog="rules-dialog">Got it</button>
+ </dialog>
+
+ <dialog class="menu-dialog info-dialog" id="theme-dialog" aria-labelledby="theme-title">
+   <div class="dialog-head"><div><p class="dialog-eyebrow">APPEARANCE</p><h2 id="theme-title">Choose your theme</h2></div><button type="button" class="dialog-close" data-close-dialog="theme-dialog" aria-label="Close theme selection">✕</button></div>
+   <div class="theme-options" role="group" aria-label="Game theme">
+     <button type="button" class="theme-choice" data-set-theme="navy" aria-pressed="true"><span class="theme-swatch navy-swatch" aria-hidden="true"></span> Midnight Navy <span class="theme-check">✓</span></button>
+     <button type="button" class="theme-choice" data-set-theme="royal" aria-pressed="false"><span class="theme-swatch royal-swatch" aria-hidden="true"></span> Royal Blue <span class="theme-check">✓</span></button>
+     <button type="button" class="theme-choice" data-set-theme="light" aria-pressed="false"><span class="theme-swatch light-swatch" aria-hidden="true"></span> Daylight <span class="theme-check">✓</span></button>
+   </div>
+   <p class="dialog-note">Your selected theme is saved on this device. The cinematic intro stays unchanged.</p>
+ </dialog>
+
+ <script src="game-v9.js" defer></script>
+ <script src="intro-v9.js" defer></script>
 </body>
 </html>
