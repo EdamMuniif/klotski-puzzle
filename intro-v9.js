@@ -1,6 +1,6 @@
 'use strict';
-/* Five-move Klotski opening — separate from the 30 playable levels.
-   Progress is a staged intro animation, not measured network transfer. */
+/* Ten-move Klotski opening — separate from the 30 playable levels.
+   Progress follows validated one-cell slides, not network transfer. */
 (() => {
   const el = id => document.getElementById(id);
   const intro = el('intro-screen');
@@ -15,15 +15,14 @@
   let currentPercent = 0;
   const pause = ms => new Promise(resolve => window.setTimeout(resolve, ms));
 
-  // Exact 4×5 Klotski layout: 10 pieces, 18 occupied cells, 2 empty spaces.
-  // Solution: lower-left blue up, lower-right blue up, lower-left yellow left,
-  // lower-right yellow right, then red target down.
+  // Ten-move shortest-solution 4×5 Klotski board: 10 blocks, 18 cells.
+  // Every move is one orthogonal cell; no blocks jump or overlap.
   const pieces = [
-    {id:'green-top',type:'green',x:1,y:0,w:2,h:1},
-    {id:'blue-upper-left',type:'blue',x:0,y:0,w:1,h:2},
-    {id:'blue-upper-right',type:'blue',x:3,y:0,w:1,h:2},
-    {id:'yellow-upper-left',type:'yellow',x:1,y:1,w:1,h:1},
-    {id:'yellow-upper-right',type:'yellow',x:2,y:1,w:1,h:1},
+    {id:'green-top',type:'green',x:0,y:0,w:2,h:1},
+    {id:'blue-upper-left',type:'blue',x:0,y:1,w:1,h:2},
+    {id:'blue-upper-right',type:'blue',x:3,y:1,w:1,h:2},
+    {id:'yellow-upper-left',type:'yellow',x:2,y:1,w:1,h:1},
+    {id:'yellow-upper-right',type:'yellow',x:2,y:0,w:1,h:1},
     {id:'red-goal',type:'goal',x:1,y:2,w:2,h:2},
     {id:'blue-lower-left',type:'blue',x:0,y:3,w:1,h:2},
     {id:'blue-lower-right',type:'blue',x:3,y:3,w:1,h:2},
@@ -61,8 +60,8 @@
     moving.element.style.setProperty('--ix', String(moving.x));
     moving.element.style.setProperty('--iy', String(moving.y));
     // The progress bar advances for exactly as long as the tile takes to slide.
-    await Promise.all([pause(900), animateProgress(percentage, 900)]);
-    await pause(90);
+    await Promise.all([pause(720), animateProgress(percentage, 720)]);
+    await pause(70);
   }
 
   function setProgress(n) {
@@ -71,7 +70,7 @@
     el('intro-fill').style.width = `${currentPercent}%`;
     el('intro-progress').setAttribute('aria-valuenow',String(percentage));
     // Text steps through the requested milestones, in sync with the sliding tiles.
-    const milestones=[0,10,20,30,50,60,70,80,90,100];
+    const milestones=[0,10,20,30,40,50,60,70,80,90,100];
     const displayed=milestones.filter(step=>step<=currentPercent+0.001).at(-1) ?? 0;
     el('intro-percent').textContent = `${displayed}%`;
   }
@@ -207,25 +206,30 @@
   async function runIntro() {
     if(reducedMotion){setProgress(100);showHome();return;}
     try {
-      await pause(270);
-      // One piece moves during each progress interval. All requested
-      // milestones appear naturally as the progress bar passes through them.
-      await movePiece('blue-lower-left',0,-1,20,'Move 1 / 5 · Lower-left blue UP');
-      await movePiece('blue-lower-right',0,-1,30,'Move 2 / 5 · Lower-right blue UP');
-      await movePiece('yellow-lower-left',-1,0,50,'Move 3 / 5 · Bottom-left yellow LEFT');
-      await movePiece('yellow-lower-right',1,0,70,'Move 4 / 5 · Bottom-right yellow RIGHT');
+      await pause(240);
+      // Ten one-cell moves, ten matched progress intervals.
+      // The 40% tick bridges the user's 30% and 50% milestones.
+      await movePiece('blue-upper-right',0,-1,10,'Move 1 / 10 · Upper-right blue UP');
+      await movePiece('blue-lower-right',0,-1,20,'Move 2 / 10 · Lower-right blue UP');
+      await movePiece('yellow-lower-right',1,0,30,'Move 3 / 10 · Bottom-right yellow RIGHT');
+      await movePiece('yellow-upper-left',-1,0,40,'Move 4 / 10 · Upper yellow LEFT');
+      await movePiece('yellow-upper-right',0,1,50,'Move 5 / 10 · Top yellow DOWN');
+      await movePiece('green-top',1,0,60,'Move 6 / 10 · Green block RIGHT');
+      await movePiece('blue-upper-left',0,-1,70,'Move 7 / 10 · Upper-left blue UP');
+      await movePiece('blue-lower-left',0,-1,80,'Move 8 / 10 · Lower-left blue UP');
+      await movePiece('yellow-lower-left',-1,0,90,'Move 9 / 10 · Bottom-left yellow LEFT');
       if(finished)return;
-      // The last tile completes only once the page is ready.
+      // Hold the final red escape until page resources are ready.
       if(document.readyState!=='complete') {
         status.textContent='Preparing final escape…';
         await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
       }
       if(finished)return;
-      await movePiece('red-goal',0,1,100,'Move 5 / 5 · Red block DOWN');
+      await movePiece('red-goal',0,1,100,'Move 10 / 10 · Red block DOWN');
       if(finished)return;
       if(pieceById['red-goal'].x!==1||pieceById['red-goal'].y!==3) throw new Error('Intro goal did not reach exit');
       await exitStage();
-      await pause(160);
+      await pause(120);
     } catch(e) {
       console.error('Intro animation failed; opening game home safely.',e);
     }
