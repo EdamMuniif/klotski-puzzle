@@ -1,25 +1,23 @@
-# Klotski — Puzzle Challenge (Version 5)
+# Klotski — Puzzle Challenge (Version 6)
 
-Mobile-first, static Klotski game for phones, tablets, and desktops. Open `index.html` to play offline (keep `game-v5.js` in the same folder). GitHub Pages automatically deploys commits to `main`.
+Responsive, offline-capable 4×5 sliding puzzle game with 30 mathematically verified puzzles. Open `index.html` in a modern browser, keeping `game-v6.js` next to it. This release is **prepared locally**; it has not yet been deployed to GitHub.
 
-## Levels
+## Sequential level-up journey
 
-- **Easy:** 9 photographed, manually reconstructed puzzles (E01–E09, shortest solutions 10–26 one-cell moves).
-- **Medium:** 9 photographed, manually reconstructed puzzles (M01–M09, shortest solutions 87–96 moves).
-- **Hard / Expert / Master:** existing 12 classic variants (H01–H12, shortest solutions 60–116 moves).
-- A separate level is unlocked within each category. The first level of every category is available immediately, including Hard Mode.
-- Switch categories from the level selection buttons. Four hints per level; counters remain exhausted after restart or refresh.
+- Complete **Easy 1–9**, then **Medium 1–9**, then **Hard 1–12**.
+- New players start at Easy 1. The next level unlocks only when the preceding level is won, including Easy→Medium and Medium→Hard transitions.
+- Revisit completed levels. A previous version's genuinely advanced unlocked levels remain accessible for returning players.
+- After the 2×2 red goal reaches the bottom-center exit, it visibly slides out of the board. A victory panel presents **Continue → Next Level**. The transition respects the system's Reduced Motion setting.
+- No automatic level jump: the user controls when to continue. At the final level, the game celebrates completion.
 
-## Controls
+## Controls and puzzle rules
 
-Drag or swipe blocks on a phone, tablet, or computer; use arrow keys on desktop after selecting a block. Undo, Restart, and shortest-route Hint are available. Red: goal 2×2; Yellow: small 1×1; Blue: vertical 1×2; Green: horizontal 2×1. Reach the bottom-center exit with the red block.
+Drag or swipe blocks with mouse, touch, or trackpad; on desktop, select a block and use arrow keys. Undo, restart, hint and saved best move counts are available. Yellow = 1×1, blue = vertical 1×2, green = horizontal 2×1, red = goal 2×2. A move is a one-cell shift.
 
-## Progress compatibility
+## Hints and persistence
 
-Version 5 stores progress in `klotski-puzzle-progress-v5`, and imports old Hard Mode V4 data from `klotski-hard-mode-progress-v2` on first use. Old data are not deleted. Best scores, unlocked Hard levels and remaining hints are preserved. Each new level has its own independent hint budget.
+Four hints **per level**, permanently deducted when requested. Restarting, undoing, refreshing, replaying, and advancing do not refill hints. Best scores and hint budgets migrate from V5 (`klotski-puzzle-progress-v5`) or original Hard V4 (`klotski-hard-mode-progress-v2`) into the new V6 key (`klotski-puzzle-progress-v6`). Earlier storage keys are not deleted. Progress is local to the browser/device and not synced online.
 
-## Puzzle validation
+## Layouts and verification
 
-The 18 handwritten layouts came from the user's two photographed puzzle sheets (9 Easy and 9 Medium). All passed geometry checks and independent breadth-first-search solving with replayed optimal solutions. Original solution data and diagrams are retained in the source validation package; the game embeds the 18 coordinate layouts.
-
-Note: Medium moves overlap Hard's numerical range. Difficulty labels follow the provided sheets, not a strictly monotonic global move count. Movement is counted in one-cell steps.
+9 independently reconstructed Easy boards, 9 Medium boards from the original handwritten sheets, and 12 preserved classic Hard boards. Optimal paths are validated by breadth-first search. The interface is responsive for phones, tablets, and desktops.
