@@ -60,8 +60,8 @@
     moving.element.style.setProperty('--ix', String(moving.x));
     moving.element.style.setProperty('--iy', String(moving.y));
     // The progress bar advances for exactly as long as the tile takes to slide.
-    await Promise.all([pause(720), animateProgress(percentage, 720)]);
-    await pause(70);
+    await Promise.all([pause(620), animateProgress(percentage, 620)]);
+    await pause(45);
   }
 
   function setProgress(n) {
