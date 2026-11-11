@@ -58,7 +58,7 @@
     const moving=pieceById[id];
     // Target approx. 6 seconds end-to-end. Each tile and the progress bar
     // use the same time interval; the final steps have a gentle cinematic hold.
-    const duration = percentage === 90 ? 470 : percentage === 100 ? 520 : 365;
+    const duration = percentage === 90 ? 430 : percentage === 100 ? 480 : 300;
     moving.element.style.setProperty('--intro-move-duration', `${duration}ms`);
     // Apply the new transition duration before changing the tile position.
     void moving.element.offsetWidth;
