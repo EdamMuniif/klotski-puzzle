@@ -159,6 +159,42 @@
     @keyframes intro-cta-arrive{0%{box-shadow:0 0 0 0 #ff826b88}50%{box-shadow:0 0 0 9px #ff826b00,0 7px 28px #d73b4577}100%{box-shadow:0 8px 23px #a5263a66}}
     body .home-screen #home-start.intro-arrived{animation:intro-cta-arrive .4s ease-out}
     @media(prefers-reduced-motion:reduce){body .home-screen #home-start.intro-arrived{animation:none}}
+    /* Cinematic handoff: the whole intro lifts away as the home card rises. */
+    .intro-screen.exit-lift{
+      transform:translate3d(0,-100%,0);
+      opacity:1;
+      transition:transform .65s cubic-bezier(.33,0,.18,1);
+      pointer-events:none;
+      will-change:transform;
+    }
+    .home-screen.reveal-measuring .home-card{
+      visibility:hidden;
+      animation:none !important;
+      transform:none !important;
+      transition:none !important;
+    }
+    .home-screen.pre-reveal .home-card{
+      opacity:0;
+      transform:translate3d(0,115px,0);
+      animation:none !important;
+      transition:none;
+    }
+    .home-screen.pre-reveal.revealing .home-card{
+      opacity:1;
+      transform:translate3d(0,0,0);
+      transition:transform .65s cubic-bezier(.33,0,.18,1),opacity .65s ease-out;
+    }
+    .home-screen.reveal-complete .home-card{
+      opacity:1;
+      transform:none;
+      animation:none !important;
+      transition:none;
+    }
+    @media(prefers-reduced-motion:reduce){
+      .intro-screen.exit-lift{transition:none}
+      .home-screen.pre-reveal .home-card,
+      .home-screen.pre-reveal.revealing .home-card{transform:none;transition:none;opacity:1}
+    }
     .intro-screen[hidden]{display:none !important}
     .home-screen{min-height:100svh;display:grid;place-items:center;padding:24px 14px 36px;background:radial-gradient(circle at 50% 0%,#184577,#0a2341 52%,#071525 92%)}
     .home-card{position:relative;width:min(100%,550px);padding:clamp(22px,5vw,46px);text-align:center;border:1px solid #426b9a;background:linear-gradient(155deg,#183b62ed,#0d243ef5);border-radius:28px;box-shadow:0 24px 75px #0007;animation:home-appear .55s ease-out}
