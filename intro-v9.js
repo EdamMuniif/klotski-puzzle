@@ -58,7 +58,7 @@
     const moving=pieceById[id];
     // Target approx. 6 seconds end-to-end. Each tile and the progress bar
     // use the same time interval; the final steps have a gentle cinematic hold.
-    const duration = percentage === 90 ? 850 : percentage === 100 ? 750 : 475;
+    const duration = percentage === 90 ? 470 : percentage === 100 ? 520 : 365;
     moving.element.style.setProperty('--intro-move-duration', `${duration}ms`);
     // Apply the new transition duration before changing the tile position.
     void moving.element.offsetWidth;
@@ -107,12 +107,17 @@
   function showHome() {
     if(finished)return;
     finished=true;
+    // Clean up the effects immediately if the user taps Skip Intro.
+    stage.querySelector('.intro-ghost')?.remove();
+    document.querySelector('.intro-home-portal')?.remove();
     updateHome();
     home.hidden=false;
     game.hidden=true;
     complete.hidden=true;
     intro.classList.add('leaving');
-    window.setTimeout(() => {intro.hidden=true;el('home-title').focus({preventScroll:true});}, reducedMotion?0:160);
+    // The cinematic handoff already faded the loader; Skip Intro still fades normally.
+    const fadeDelay = reducedMotion || intro.classList.contains('leaving-before-home') ? 0 : 260;
+    window.setTimeout(() => {intro.hidden=true;el('home-title').focus({preventScroll:true});}, fadeDelay);
   }
 
   function displayGame() {
@@ -183,47 +188,85 @@
   applyTheme(preferredTheme);
 
   async function exitStage() {
-    if(finished)return;
-    status.textContent='100% · Exit unlocked!';
+    if (finished) return;
     intro.classList.add('unlocked');
-    const goal=pieceById['red-goal'].element;
-    if(reducedMotion || typeof goal.animate!=='function')return;
+    const goal = pieceById['red-goal'].element;
+    if (reducedMotion || typeof goal.animate !== 'function') return;
 
-    const rect=goal.getBoundingClientRect();
-    const parent=stage.getBoundingClientRect();
-    const gate=stage.querySelector('.intro-exit').getBoundingClientRect();
+    const rect = goal.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const gateRect = stage.querySelector('.intro-exit').getBoundingClientRect();
 
-    // The red block is masked AT the cyan exit gate. Unlike the old ghost,
-    // it cannot float over the progress bar or the Skip Intro control.
-    const tunnel=document.createElement('div');
-    tunnel.className='intro-exit-viewport';
-    tunnel.style.height=`${Math.max(0,gate.top-parent.top+2)}px`;
-    const ghost=goal.cloneNode(true);
-    ghost.className='intro-piece goal intro-ghost';
+    // First pass: the red block moves BEHIND the luminous exit line, then
+    // becomes visible on the other side. It never changes any game state.
+    const ghost = goal.cloneNode(true);
+    ghost.className = 'intro-piece goal intro-ghost';
     ghost.style.setProperty('--ix','0');
     ghost.style.setProperty('--iy','0');
-    ghost.style.left=`${rect.left-parent.left}px`;
-    ghost.style.top=`${rect.top-parent.top}px`;
-    ghost.style.width=`${rect.width}px`;
-    ghost.style.height=`${rect.height}px`;
-    tunnel.append(ghost);
-    stage.append(tunnel);
-    goal.style.opacity='0';
+    ghost.style.left = `${rect.left-stageRect.left}px`;
+    ghost.style.top = `${rect.top-stageRect.top}px`;
+    ghost.style.width = `${rect.width}px`;
+    ghost.style.height = `${rect.height}px`;
+    stage.append(ghost);
+    goal.style.opacity = '0';
 
-    const effect=ghost.animate([
-      {transform:'translateY(0px)',opacity:1},
-      {transform:`translateY(${rect.height+18}px)`,opacity:1}
-    ],{duration:420,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
-    await Promise.race([effect.finished.catch(()=>{}),pause(470)]);
-    tunnel.remove();
+    const travel = Math.max(40, gateRect.top-rect.top+Math.min(44,rect.height*0.32));
+    const underGate = ghost.animate([
+      { transform:'translateY(0px)' },
+      { transform:`translateY(${travel}px)` }
+    ], {duration:290,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
+    await Promise.race([underGate.finished.catch(()=>{}),pause(350)]);
+    if (finished) { ghost.remove(); return; }
+
+    const emerged = ghost.getBoundingClientRect();
+    ghost.remove();
+
+    // Second pass: reveal the existing home page beneath the loader and
+    // morph the escaped red tile into its matching red Continue Playing button.
+    updateHome();
+    home.hidden = false;
+    game.hidden = true;
+    complete.hidden = true;
+    const button = el('home-start');
+    const destination = button.getBoundingClientRect();
+    const portal = document.createElement('div');
+    portal.className = 'intro-home-portal';
+    const portalLabel = document.createElement('b');
+    portalLabel.textContent = 'EXIT';
+    portal.append(portalLabel);
+    Object.assign(portal.style,{
+      left:`${emerged.left}px`,top:`${emerged.top}px`,
+      width:`${emerged.width}px`,height:`${emerged.height}px`
+    });
+    document.body.append(portal);
+
+    intro.classList.add('leaving','leaving-before-home');
+    const morph = portal.animate([
+      { left:`${emerged.left}px`,top:`${emerged.top}px`,
+        width:`${emerged.width}px`,height:`${emerged.height}px`,
+        opacity:1,offset:0 },
+      { left:`${destination.left}px`,top:`${destination.top}px`,
+        width:`${destination.width}px`,height:`${destination.height}px`,
+        opacity:1,offset:.82 },
+      { left:`${destination.left}px`,top:`${destination.top}px`,
+        width:`${destination.width}px`,height:`${destination.height}px`,
+        opacity:0,offset:1 }
+    ],{duration:650,easing:'cubic-bezier(.33,0,.18,1)',fill:'forwards'});
+    portalLabel.animate([{opacity:1,offset:0},{opacity:0,offset:.65},{opacity:0,offset:1}],
+      {duration:650,fill:'forwards'});
+    await Promise.race([morph.finished.catch(()=>{}),pause(720)]);
+    portal.remove();
+    if (!finished) {
+      button.classList.add('intro-arrived');
+      window.setTimeout(()=>button.classList.remove('intro-arrived'),450);
+    }
   }
 
   async function runIntro() {
     if(reducedMotion){setProgress(100);showHome();return;}
     try {
-      await pause(50);
-      // Ten one-cell moves, ten matched progress intervals.
-      // The 40% tick bridges the user's 30% and 50% milestones.
+      await pause(40);
+      // Ten verified one-cell moves, synchronized with the progress display.
       await movePiece('blue-upper-right',0,-1,10,'Move 1 / 10 · Upper-right blue UP');
       await movePiece('blue-lower-right',0,-1,20,'Move 2 / 10 · Lower-right blue UP');
       await movePiece('yellow-lower-right',1,0,30,'Move 3 / 10 · Bottom-right yellow RIGHT');
@@ -234,8 +277,6 @@
       await movePiece('blue-lower-left',0,-1,80,'Move 8 / 10 · Lower-left blue UP');
       await movePiece('yellow-lower-left',-1,0,90,'Move 9 / 10 · Bottom-left yellow LEFT');
       if(finished)return;
-      // All deferred game scripts have initialized before this intro executes.
-      // Do not add an unpredictable window-load wait before the last move.
       if(finished)return;
       await movePiece('red-goal',0,1,100,'Move 10 / 10 · Red block DOWN');
       if(finished)return;
