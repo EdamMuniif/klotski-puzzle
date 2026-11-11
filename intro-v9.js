@@ -56,12 +56,16 @@
     if (!legalMove(id, dx, dy)) throw new Error(`Invalid intro move: ${id}`);
     status.textContent = description;
     const moving=pieceById[id];
+    // Target approx. 6 seconds end-to-end. Each tile and the progress bar
+    // use the same time interval; the final steps have a gentle cinematic hold.
+    const duration = percentage === 90 ? 850 : percentage === 100 ? 750 : 475;
+    moving.element.style.setProperty('--intro-move-duration', `${duration}ms`);
+    // Apply the new transition duration before changing the tile position.
+    void moving.element.offsetWidth;
     moving.x+=dx;moving.y+=dy;
     moving.element.style.setProperty('--ix', String(moving.x));
     moving.element.style.setProperty('--iy', String(moving.y));
-    // The progress bar advances for exactly as long as the tile takes to slide.
-    await Promise.all([pause(620), animateProgress(percentage, 620)]);
-    await pause(45);
+    await Promise.all([pause(duration), animateProgress(percentage, duration)]);
   }
 
   function setProgress(n) {
@@ -108,7 +112,7 @@
     game.hidden=true;
     complete.hidden=true;
     intro.classList.add('leaving');
-    window.setTimeout(() => {intro.hidden=true;el('home-title').focus({preventScroll:true});}, reducedMotion?0:560);
+    window.setTimeout(() => {intro.hidden=true;el('home-title').focus({preventScroll:true});}, reducedMotion?0:160);
   }
 
   function displayGame() {
@@ -183,30 +187,41 @@
     status.textContent='100% · Exit unlocked!';
     intro.classList.add('unlocked');
     const goal=pieceById['red-goal'].element;
-    if(reducedMotion || typeof goal.animate!=='function') {await pause(100);return;}
-    const rect=goal.getBoundingClientRect(), parent=stage.getBoundingClientRect();
+    if(reducedMotion || typeof goal.animate!=='function')return;
+
+    const rect=goal.getBoundingClientRect();
+    const parent=stage.getBoundingClientRect();
+    const gate=stage.querySelector('.intro-exit').getBoundingClientRect();
+
+    // The red block is masked AT the cyan exit gate. Unlike the old ghost,
+    // it cannot float over the progress bar or the Skip Intro control.
+    const tunnel=document.createElement('div');
+    tunnel.className='intro-exit-viewport';
+    tunnel.style.height=`${Math.max(0,gate.top-parent.top+2)}px`;
     const ghost=goal.cloneNode(true);
     ghost.className='intro-piece goal intro-ghost';
-    ghost.style.setProperty('--ix','0');ghost.style.setProperty('--iy','0');
+    ghost.style.setProperty('--ix','0');
+    ghost.style.setProperty('--iy','0');
     ghost.style.left=`${rect.left-parent.left}px`;
     ghost.style.top=`${rect.top-parent.top}px`;
-    ghost.style.width=`${rect.width}px`;ghost.style.height=`${rect.height}px`;
-    stage.append(ghost);
+    ghost.style.width=`${rect.width}px`;
+    ghost.style.height=`${rect.height}px`;
+    tunnel.append(ghost);
+    stage.append(tunnel);
     goal.style.opacity='0';
-    const travel=parent.bottom-rect.top+25;
+
     const effect=ghost.animate([
-      {transform:'translateY(0px)',opacity:1,offset:0},
-      {transform:`translateY(${travel*.7}px)`,opacity:1,offset:.78},
-      {transform:`translateY(${travel}px) scale(.87)`,opacity:0,offset:1}
-    ],{duration:840,easing:'cubic-bezier(.21,.68,.3,1)',fill:'forwards'});
-    await Promise.race([effect.finished.catch(()=>{}),pause(1050)]);
-    ghost.remove();
+      {transform:'translateY(0px)',opacity:1},
+      {transform:`translateY(${rect.height+18}px)`,opacity:1}
+    ],{duration:420,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
+    await Promise.race([effect.finished.catch(()=>{}),pause(470)]);
+    tunnel.remove();
   }
 
   async function runIntro() {
     if(reducedMotion){setProgress(100);showHome();return;}
     try {
-      await pause(240);
+      await pause(50);
       // Ten one-cell moves, ten matched progress intervals.
       // The 40% tick bridges the user's 30% and 50% milestones.
       await movePiece('blue-upper-right',0,-1,10,'Move 1 / 10 · Upper-right blue UP');
@@ -219,17 +234,13 @@
       await movePiece('blue-lower-left',0,-1,80,'Move 8 / 10 · Lower-left blue UP');
       await movePiece('yellow-lower-left',-1,0,90,'Move 9 / 10 · Bottom-left yellow LEFT');
       if(finished)return;
-      // Hold the final red escape until page resources are ready.
-      if(document.readyState!=='complete') {
-        status.textContent='Preparing final escape…';
-        await new Promise(resolve=>window.addEventListener('load',resolve,{once:true}));
-      }
+      // All deferred game scripts have initialized before this intro executes.
+      // Do not add an unpredictable window-load wait before the last move.
       if(finished)return;
       await movePiece('red-goal',0,1,100,'Move 10 / 10 · Red block DOWN');
       if(finished)return;
       if(pieceById['red-goal'].x!==1||pieceById['red-goal'].y!==3) throw new Error('Intro goal did not reach exit');
       await exitStage();
-      await pause(120);
     } catch(e) {
       console.error('Intro animation failed; opening game home safely.',e);
     }
