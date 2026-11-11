@@ -108,7 +108,7 @@
     if(finished)return;
     finished=true;
     // Clean up the effects immediately if the user taps Skip Intro.
-    stage.querySelector('.intro-ghost')?.remove();
+    stage.querySelector('.intro-exit-passage')?.remove();
     document.querySelector('.intro-home-portal')?.remove();
     updateHome();
     home.hidden=false;
@@ -199,6 +199,12 @@
 
     // First pass: the red block moves BEHIND the luminous exit line, then
     // becomes visible on the other side. It never changes any game state.
+    const passage = document.createElement('div');
+    passage.className = 'intro-exit-passage';
+    // Clip the exit tunnel before the progress bar, while keeping a visible
+    // slice of the red block below the blue exit line.
+    const passageHeight = Math.max(0,gateRect.top-stageRect.top+105);
+    passage.style.height = `${passageHeight}px`;
     const ghost = goal.cloneNode(true);
     ghost.className = 'intro-piece goal intro-ghost';
     ghost.style.setProperty('--ix','0');
@@ -207,7 +213,8 @@
     ghost.style.top = `${rect.top-stageRect.top}px`;
     ghost.style.width = `${rect.width}px`;
     ghost.style.height = `${rect.height}px`;
-    stage.append(ghost);
+    passage.append(ghost);
+    stage.append(passage);
     goal.style.opacity = '0';
 
     const travel = Math.max(40, gateRect.top-rect.top+Math.min(44,rect.height*0.32));
@@ -216,10 +223,11 @@
       { transform:`translateY(${travel}px)` }
     ], {duration:290,easing:'cubic-bezier(.42,0,.58,1)',fill:'forwards'});
     await Promise.race([underGate.finished.catch(()=>{}),pause(350)]);
-    if (finished) { ghost.remove(); return; }
+    if (finished) { passage.remove(); return; }
 
     const emerged = ghost.getBoundingClientRect();
-    ghost.remove();
+    const clippedBottom = Math.max(0,emerged.bottom-(stageRect.top+passageHeight));
+    passage.remove();
 
     // Second pass: reveal the existing home page beneath the loader and
     // morph the escaped red tile into its matching red Continue Playing button.
@@ -236,7 +244,8 @@
     portal.append(portalLabel);
     Object.assign(portal.style,{
       left:`${emerged.left}px`,top:`${emerged.top}px`,
-      width:`${emerged.width}px`,height:`${emerged.height}px`
+      width:`${emerged.width}px`,height:`${emerged.height}px`,
+      clipPath:`inset(0 0 ${clippedBottom}px 0)`
     });
     document.body.append(portal);
 
@@ -244,13 +253,13 @@
     const morph = portal.animate([
       { left:`${emerged.left}px`,top:`${emerged.top}px`,
         width:`${emerged.width}px`,height:`${emerged.height}px`,
-        opacity:1,offset:0 },
+        opacity:1,clipPath:`inset(0 0 ${clippedBottom}px 0)`,offset:0 },
       { left:`${destination.left}px`,top:`${destination.top}px`,
         width:`${destination.width}px`,height:`${destination.height}px`,
-        opacity:1,offset:.82 },
+        opacity:1,clipPath:'inset(0px 0px 0px 0px)',offset:.82 },
       { left:`${destination.left}px`,top:`${destination.top}px`,
         width:`${destination.width}px`,height:`${destination.height}px`,
-        opacity:0,offset:1 }
+        opacity:0,clipPath:'inset(0px 0px 0px 0px)',offset:1 }
     ],{duration:650,easing:'cubic-bezier(.33,0,.18,1)',fill:'forwards'});
     portalLabel.animate([{opacity:1,offset:0},{opacity:0,offset:.65},{opacity:0,offset:1}],
       {duration:650,fill:'forwards'});
