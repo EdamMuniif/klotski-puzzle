@@ -107,9 +107,12 @@
   function showHome() {
     if(finished)return;
     finished=true;
-    // Clean up the effects immediately if the user taps Skip Intro.
+    // Skip Intro and finished animation share one safe home-state cleanup.
     stage.querySelector('.intro-exit-passage')?.remove();
     document.querySelector('.intro-home-portal')?.remove();
+    const hadHandoff = intro.classList.contains('exit-lift');
+    home.classList.remove('reveal-measuring','pre-reveal','revealing');
+    if (hadHandoff) home.classList.add('reveal-complete');
     updateHome();
     home.hidden=false;
     game.hidden=true;
@@ -235,8 +238,20 @@
     home.hidden = false;
     game.hidden = true;
     complete.hidden = true;
+
+    // Measure the button in its final, fully laid-out position first.
+    // The reveal-measuring state is invisible but NOT display:none.
+    home.classList.remove('reveal-complete','pre-reveal','revealing');
+    home.classList.add('reveal-measuring');
     const button = el('home-start');
     const destination = button.getBoundingClientRect();
+
+    // Put the home card just below its final position, then flush layout.
+    // This prevents the first reveal frame from jumping into place.
+    home.classList.remove('reveal-measuring');
+    home.classList.add('pre-reveal');
+    void home.querySelector('.home-card').offsetWidth;
+
     const portal = document.createElement('div');
     portal.className = 'intro-home-portal';
     const portalLabel = document.createElement('b');
@@ -249,7 +264,10 @@
     });
     document.body.append(portal);
 
-    intro.classList.add('leaving','leaving-before-home');
+    // Slide the full loading screen UP while the home card rises from below.
+    // Both transitions share the red tile's 650 ms morph timeline.
+    intro.classList.add('exit-lift','leaving-before-home');
+    home.classList.add('revealing');
     const morph = portal.animate([
       { left:`${emerged.left}px`,top:`${emerged.top}px`,
         width:`${emerged.width}px`,height:`${emerged.height}px`,
@@ -265,6 +283,8 @@
       {duration:650,fill:'forwards'});
     await Promise.race([morph.finished.catch(()=>{}),pause(720)]);
     portal.remove();
+    home.classList.remove('reveal-measuring','pre-reveal','revealing');
+    home.classList.add('reveal-complete');
     if (!finished) {
       button.classList.add('intro-arrived');
       window.setTimeout(()=>button.classList.remove('intro-arrived'),450);
